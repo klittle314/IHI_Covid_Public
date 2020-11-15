@@ -234,7 +234,34 @@ Thus, we have problems with both the raw series and the adjusted series.  The ra
 
 ## Testing your copy of the code
 
-We include a copy of the input CSV files as of 13 November 2020 for both country and U.S. states and territories.   Change the 
+We include a copy of the input CSV files as of 13 November 2020 for both country and U.S. states and territories. 
+
+To avoid overwriting the output files provided for your test, copy the contents of the samples folder and output folder into renamed folders.
+
+In the generate-date-files.R script, replace the lines
+```
+data_file_country <- paste0('data/country_data_', as.character(Sys.Date()), '.csv')
+data_file_state   <- paste0('data/us_state_data_', as.character(Sys.Date()), '.csv')`
+```
+with
+```
+data_file_country <- paste0('data/country_data_2020-11-13.csv')
+data_file_state   <- paste0('data/us_state_data_2020-11-13.csv)
+```
+If the code runs correctly, you should see four pdf files of plots in the samples folder:
+
+- adjusted-country.pdf
+- adjusted-state.pdf
+- raw-country.pdf
+- raw-state.pdf
+
+And you should see five CSV files in the output folder that drive the IHI PowerBI display:
+
+- Country Daily MultiPhase ADJ.csv
+- Country Daily MultiPhase.csv
+- Dates by Phase II.csv
+- NYT Daily MultiPhase ADJ.csv
+- NYT Daily MultiPhase.csv
 
 ## Contributing
 We have not yet set up a process to incorporate changes into the code.   Check back in the future!
@@ -243,7 +270,8 @@ We have not yet set up a process to incorporate changes into the code.   Check b
 Kevin Little led the development of the code and managed the project, reverse engineering the PowerBI display on the IHI website.   
 
 ## Acknowledgements
-Neel Vora, Director of Business Applications at IHI, conducted critical tests of the output files and modified the PowerBI code to read the CSV files produced by the R code.   Lloyd Provost, Associates in Process Improvment, consulted frequently on logical questions and guided parameter choices.
+Neel Vora, Director of Business Applications at IHI, conducted critical tests of the output files and adjusted PowerBI code to access the CSV files produced by the R code.   Lloyd Provost, Associates in Process Improvment, consulted frequently on logical questions and guided parameter choices.
 
 ## License
 This project is licensed under the MIT License -- see the LICENSE.md file for details. 
+
