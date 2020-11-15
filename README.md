@@ -63,7 +63,7 @@ if (!file.exists(data_file_state)) {
 ```
 ### Copying the code for local use
 
-[Click here to download the latest version]() **link not yet active**
+[Click here to download this repository as a zip file](https://github.com/klittle314/IHI_Covid_Public/zipball/main) 
 
 Alternatively, if you understand how repositories work, you can fork the master branch for your use.
 
