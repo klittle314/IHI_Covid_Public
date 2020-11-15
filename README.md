@@ -232,4 +232,18 @@ All of the log10 residuals are negative except for the record on 11 October.  He
 
 Thus, we have problems with both the raw series and the adjusted series.  The raw data series can show a systematic pattern day-of-week reporting; that is, the series can have a special cause of variation arising from measurement reporting that may affect the control limits. On the other hand, the adjusted data has an upward bias in the model fit and may induce records larger than any observed in the raw data.  Here's my current view:  The message in the charts should be an interpolation between the ‘raw’ and the ‘adjusted’ displays.   A display that incorporates adjusted data should allow the user also to see the raw data to make a considered interpretation.  "Presentation of results, to be optimally useful, and to be good science, must conform to Shewhart’s rule: viz., preserve, for the uses intended, all the evidence in the original data.” (W.E. Deming, “On probability as a basis for action”, *American Statistician*, **29**, No. 4., 148)
 
+## Testing your copy of the code
 
+We include a copy of the input CSV files as of 13 November 2020 for both country and U.S. states and territories.   Change the 
+
+## Contributing
+We have not yet set up a process to incorporate changes into the code.   Check back in the future!
+
+## Author
+Kevin Little led the development of the code and managed the project, reverse engineering the PowerBI display on the IHI website.   
+
+## Acknowledgements
+Neel Vora, Director of Business Applications at IHI, conducted critical tests of the output files and modified the PowerBI code to read the CSV files produced by the R code.   Lloyd Provost, Associates in Process Improvment, consulted frequently on logical questions and guided parameter choices.
+
+## License
+This project is licensed under the MIT License -- see the LICENSE.md file for details. 
