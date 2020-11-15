@@ -37,7 +37,7 @@ People who have a basic understanding of Shewhart control charts and want to app
 
 ## Getting Started
 
-This document describes the R code and what you need to run it yourself.  It provides sample output for you to check for successful use **not yet linked/finished**
+This document describes the R code and what you need to run it yourself.  It provides sample output for you to check for successful use **not yet linked/finished 15 November 2020**
 
 ### Prerequisites
 
