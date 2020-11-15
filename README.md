@@ -1,11 +1,11 @@
 # R scripts to generate control chart limits used by IHI's PowerBI application
-Notes by [Kevin Little](mailto:klittle@iecodesign.com?subject=[GitHub]IHI_Covid_display_Nov2020), Ph.D., Informing Ecological Design, LLC 
+Notes by [Kevin Little](mailto:klittle@iecodesign.com?subject=[GitHub]IHI_Covid_display_Nov2020), Ph.D., Informing Ecological Design, LLC last updated 15 November 2020
 
 This project implements a method based on control charts to view phases in daily reported deaths from COVID-19. The method was developed by Lloyd Provost, Shannon Provost, Rocco Perla, Gareth Parry, and Kevin Little, with an initial focus on death series and is described [here](https://academic.oup.com/intqhc/advance-article/doi/10.1093/intqhc/mzaa069/5863166).
 
 Gareth Parry used SPSS to develop the initial IHI presentation in the spring and summer of 2020.  His SPSS code created data tables for countries and U.S. states and territories.  Gareth created a PowerBI script to read these tables and created the data displays.  The IHI display is [here](http://www.ihi.org/Topics/COVID-19/Pages/COVID-19-Data-Dashboard.aspx). 
 
-In September, Kevin Little advised by Lloyd Provost replaced the SPSS code with R code that requires less daily human intervention.   This document describes the R code function and limitations.  The PowerBI visualization remains essentially the same.
+In September, Kevin Little advised by Lloyd Provost replaced the SPSS code with R code that requires less daily human intervention.   This document describes the R code function and limitations.  The PowerBI visualization may undergo revision in the near future.
 
 ## The foundation of our control chart modeling:  Epochs and phases
 Epidemiologists use the term 'phases' to describe the structure of a pandemic.  The [core WHO pandemic reference](https://www.ncbi.nlm.nih.gov/books/NBK143061/) for example says: "The WHO pandemic phases were developed in 1999 and revised in 2005. The phases are applicable to the entire world and provide a global framework to aid countries in pandemic preparedness and response planning." 
@@ -63,7 +63,7 @@ if (!file.exists(data_file_state)) {
 ```
 ### Copying the code for local use
 
-[Click here to download the latest version](https://github.com/klittle314/IHI_Covid_display_Nov2020/archive/master.zip) **link not yet active**
+[Click here to download the latest version](archive/main.zip) **link not yet active**
 
 Alternatively, if you understand how repositories work, you can fork the master branch for your use.
 
