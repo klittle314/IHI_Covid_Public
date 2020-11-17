@@ -214,7 +214,7 @@ Similarly, there are two points below the lower limit in the sixth phase of the 
 
 The '21 record' requirement can also lead to a run of values below the midline that is greater than 8 before signal of a new phase.   For example, here is a view of the United Kingdom that shows a run of nine values below baseline before the start of the next phase.   The next phase is in fact triggered by two consecutive points below the lower limit from the previous phase calculations, based on 21 records in the calculations.
 
-![UK signal in baseline](
+![UK signal in baseline]()
 
 **Bias induced by the adjustment method**  In Epochs 2 and 3, we set zero values to missing before calculating the model fit on the log10 scale.   Eliminating the zero values has the effect of biasing the fit upwards.   We have not characterized the size of the bias.  An alternative to a linear model fitted to log10 deaths:  fit a Poisson regression, possibly allowing for over-dispersion. Zero values will be handled directly as observed values.  As this is not the approach used in the initial IHI application, we did not pursue this alternative in the current R development.
 
