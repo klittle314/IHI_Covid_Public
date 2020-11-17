@@ -121,13 +121,13 @@ shift length:  eight consecutive values above or below the midline of a phase si
 
 ## Notes on the algorithm
 
-### flagging and setting aside unusually large values:  ghosting
+### Flagging and setting aside unusually large values:  ghosting
 The detect_outlier function examines each daily record to assess if the record is unusually large compared to days preceding and following the record.  During spring 2020, we followed news reports of 'data dumps' and flagged these events manually.  Such data dumps are a simple and clear example of a special cause of variation in the data series.  If you adapt the R code for your own use, we recommend that you allow users to identify records that should be excluded from calculations using your knowledge of the reported death series.  In our development team, we refer to records flagged by the detect_outlier function as 'ghosted' because the original PowerBI script plotted such values with a pale dot.
 
-### monotonicity
+### Monotonicity
 The New York Times data table provides cumulative death counts for each U.S. state or territory.  The code differences the cumulative death series to get daily deaths.  The cumulative death count series shows adjustments for 27 states and territories as of 8 November that make the series non-monotone increasing--52 records are less than previous records, within state or territory.  This means that the differenced series will have negative values.   To eliminate negative deaths in the differenced series, the function allocates the negative values to previous records so that the revised series has only non-negative values.
 
-### adjusting
+### Adjusting
 By June, the development team saw that some locations reported deaths in a systematic way:  one or two days a week tended to be lower than the other six or five days in each calendar week.  As a result, the IHI application adjusted for a day-of-week effect.  We developed the R code to mimic the IHI application:  the R code generates adjusted data for each location.  The adjusted data series is then used as input to the epochs and phases algorithm.
 
 For example, Illinois shows a strong pattern of two days a week lower than the other five.  The pattern is easy to see starting in Epoch 3, phase 1:
@@ -171,10 +171,10 @@ Louisiana provides a clear example of the situation, with reported deaths on Sat
 
 In the Louisiana case, our adjustment actually seems to work well: from the data series, it appears that Louisiana is reporting only six days each week for weeks starting in mid-summer and model fits accommodate this structure. 
 
-### computations related to the c-chart
+### Computations related to the c-chart
 The function find_phase_dates calculates the c-chart center line and upper control limit in Epochs 1 and 4.  As described above, the c-chart calculations are based on several other parameters.  The c-chart calculations require at least 8 non-zero deaths; the maximum number of records used for the c-chart calculations is 21.  As the find_phase_dates function iterates through the records, the calculation stops as soon as a special cause signal is detected.  We designed the c-chart calculations to identify the tentative starting point of exponential growth and recognize this approach might not reproduce the c-chart designed by an analyst to look at a sequence of events.  An analyst might require a minimum number of records (e.g. 15 or 20) and iteratively remove points that generate special cause signal(s).  See the additional discussion below on the difference between the rules used in the first phase of Epoch 1 or 4 and subsequent phases within those epochs.  The detailed table [here](https://github.com/klittle314/IHI_Covid_display_Nov2020/blob/main/Phase%20and%20Epoch%20logic%209%20November%202020%20public%20version.pdf) summarizes our rules for transitions from phase to phase within and between epochs.
 
-### computations related to the fit of the regression line
+### Computations related to the fit of the regression line
 
 #### Calculation of the control chart limits using residuals from linear regression on log10 deaths
 The code uses the median moving range to estimate 'sigma-hat' in the calculation of the individuals control chart parameters.  That's why we use the multiplier 3.14 to compute the upper and lower control limits rather than the customary 2.66 value.  The median moving range is more robust to one or two large point-to-point ranges relative to the average moving range.  Usually, use of the average moving range requires two stages:  examine moving ranges to determine if there are any that are unusually large on a chart of moving ranges; discard any ranges that exceed the upper control limit on the range chart, and recalculate the limits on the individuals chart.  We chose to use the median approach to simplify the derivation of the individuals control chart limits.
@@ -189,9 +189,10 @@ In model_phase_change, we use the test of significance (p-value) and the sign of
 |   3   | p >= .05:  neither growth nor decay |
 
 
-## Details and limitations of the current method
-### Requirement of 21 records to fit the control chart in Epochs 2 and 3 can lead to signals ignored until the end of baseline period   
-Our requirement of 21 records before calculating control limits in Epochs 2 and 3 can lead to special cause signals within the 21 record span. We imposed the 21 record rule to align with typical control chart advice to have 20 records to calculate chart parametersand to allow three weeks of data for the adjustment algorithm. 
+## Limitations and Implications of the method
+
+### Requirement of 21 records to fit the control chart in Epochs 2 and 3 can lead to apparent control chart signals that are ignored   
+Our requirement of 21 records before calculating control limits in Epochs 2 and 3 can lead to special cause signals within the 21 record span. We imposed the 21 record rule to align with typical control chart advice to have 20 records to calculate chart parameters and to allow three weeks of data for the adjustment algorithm. Our requirement of 21 records tends to reduce the number of phases in a series relative to code that does not impose the requirement.
 
 Our method does not react to the signals within the initial 21 records even though one may argue that such signals undermine the basis for the control limit calculations.  For example, Turkey shows a signal in the beginning of phase 7, with eight consecutive points above the mid line in records six to sixteen of the phase.  An analyst working by hand might identify the signal of special cause in 11 deaths above the midline and decide not to calculate limits or annotate the phase to indicate the poor fit.
 
