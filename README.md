@@ -1,5 +1,5 @@
 # R scripts to generate control chart limits used by IHI's PowerBI application
-Notes by [Kevin Little](mailto:klittle@iecodesign.com?subject=[GitHub]IHI_Covid_display_Nov2020), Ph.D., Informing Ecological Design, LLC last updated 16 November 2020
+Notes by [Kevin Little](mailto:klittle@iecodesign.com?subject=[GitHub]IHI_Covid_display_Nov2020), Ph.D., Informing Ecological Design, LLC last updated 17 November 2020
 
 This project implements a method based on control charts to view phases in daily reported deaths from COVID-19. The method was developed by Lloyd Provost, Shannon Provost, Rocco Perla, Gareth Parry, and Kevin Little, with an initial focus on death series and is described [here](https://academic.oup.com/intqhc/advance-article/doi/10.1093/intqhc/mzaa069/5863166).
 
@@ -37,7 +37,7 @@ People who have a basic understanding of Shewhart control charts and want to app
 
 ## Getting Started
 
-This document describes the R code and what you need to run it yourself.  It provides sample output for you to check for successful use **not yet linked/finished 15 November 2020**
+This document describes the R code and what you need to run it yourself.  It provides sample output for you to check for successful installation.
 
 ### Prerequisites
 
@@ -172,7 +172,7 @@ Louisiana provides a clear example of the situation, with reported deaths on Sat
 In the Louisiana case, our adjustment actually seems to work well: from the data series, it appears that Louisiana is reporting only six days each week for weeks starting in mid-summer and model fits accommodate this structure. 
 
 ### Computations related to the c-chart
-The function find_phase_dates calculates the c-chart center line and upper control limit in Epochs 1 and 4.  As described above, the c-chart calculations are based on several other parameters.  The c-chart calculations require at least 8 non-zero deaths; the maximum number of records used for the c-chart calculations is 21.  As the find_phase_dates function iterates through the records, the calculation stops as soon as a special cause signal is detected.  We designed the c-chart calculations to identify the tentative starting point of exponential growth and recognize this approach might not reproduce the c-chart designed by an analyst to look at a sequence of events.  An analyst might require a minimum number of records (e.g. 15 or 20) and iteratively remove points that generate special cause signal(s).  See the additional discussion below on the difference between the rules used in the first phase of Epoch 1 or 4 and subsequent phases within those epochs.  The detailed table [here](https://github.com/klittle314/IHI_Covid_display_Nov2020/blob/main/Phase%20and%20Epoch%20logic%209%20November%202020%20public%20version.pdf) summarizes our rules for transitions from phase to phase within and between epochs.
+The function find_phase_dates calculates the c-chart center line and upper control limit in Epochs 1 and 4.  As described above, the c-chart calculations are based on several other parameters.  The c-chart calculations require at least 8 non-zero deaths; the maximum number of records used for the c-chart calculations is 21.  As the find_phase_dates function iterates through the records, the calculation stops as soon as a special cause signal is detected.  We designed the c-chart calculations to identify the tentative starting point of exponential growth and recognize this approach might not reproduce the c-chart designed by an analyst to look at a sequence of events.  An analyst might require a minimum number of records (e.g. 15 or 20) and iteratively remove points that generate special cause signal(s).  See the additional discussion below on the difference between the rules used in the first phase of Epoch 1 or 4 and subsequent phases within those epochs.  The detailed table [here](Phase%20and%20Epoch%20logic%20public%20version.pdf) summarizes our rules for transitions from phase to phase within and between epochs.
 
 ### Computations related to the fit of the regression line
 
@@ -223,7 +223,7 @@ In Epoch 3, the log transformation stretches the scale of the control limits whe
 ### Bias induced by the adjustment method 
 In Epochs 2 and 3, we set zero values to missing before calculating the model fit on the log10 scale.   Eliminating the zero values has the effect of biasing the fit upwards.   We have not characterized the size of the bias.  An alternative to a linear model fitted to log10 deaths:  fit a Poisson regression, possibly allowing for over-dispersion. Zero values will be handled directly as observed values.  As this is not the approach used in the initial IHI application, we did not pursue this alternative in the current R development.
 
-Also, the adjustment procedure can produce values in the adjusted series that are larger than those in the observed series.  Consider Florida's raw death series, phase 5. ![Florida induced large value](https://github.com/klittle314/IHI_Covid_display_Nov2020/blob/main/images/Florida%20adjusted%202020-11-08_19-50-02.jpg)  Here is the table of relevant values for the Sundays in the series.   
+Also, the adjustment procedure can produce values in the adjusted series that are larger than those in the observed series.  Consider Florida's raw death series, phase 5. ![Florida induced large value](images/Florida%20adjusted%202020-11-08_19-50-02.jpg)  Here is the table of relevant values for the Sundays in the series.   
 
 |date     | weekday| New_Deaths| Deaths_adj| log10_Deaths|        adjustment| log10_residuals|
 |:----------|-------:|----------:|----------:|------------:|----------:|---------------:|
@@ -245,9 +245,9 @@ Thus, we have problems with both the raw series and the adjusted series.  The ra
 
 We include a copy of the input CSV files as of 13 November 2020 for both country and U.S. states and territories. 
 
-To avoid overwriting the output files provided for your test, copy the contents of the samples folder and output folder into renamed folders, e.g. 13Nov_samples and 13Nov_output. 
+To avoid overwriting the output files provided for your test, copy the contents of the **samples** folder and **output** folder into renamed folders, e.g. **13Nov_samples** and **13Nov_output**. 
 
-*If you do not copy the contents of these folders, the code will overwrite the existing files.*
+*Reminder:  If you do not copy the contents of these folders, the code will overwrite the existing files.*
 
 In the generate-date-files.R script, replace the lines
 ```
@@ -259,14 +259,14 @@ with path to your renamed folder
 data_file_country <- paste0('data/country_data_2020-11-13.csv')
 data_file_state   <- paste0('data/us_state_data_2020-11-13.csv)
 ```
-If the code runs correctly, you should see four pdf files of plots in the samples folder:
+If the code runs correctly, you should see four pdf files of plots in the **samples** folder:
 
 - adjusted-country.pdf
 - adjusted-state.pdf
 - raw-country.pdf
 - raw-state.pdf
 
-And you should see five CSV files in the output folder that drive the IHI PowerBI display:
+And you should see five CSV files in the **output** folder that drive the IHI PowerBI display:
 
 - Country Daily MultiPhase ADJ.csv
 - Country Daily MultiPhase.csv
@@ -274,7 +274,7 @@ And you should see five CSV files in the output folder that drive the IHI PowerB
 - NYT Daily MultiPhase ADJ.csv
 - NYT Daily MultiPhase.csv
 
-Compare the output files just generated to the output files we provided. 
+Compare the files just generated to the corresponding files 'as of 13 November' that we provided. 
 
 ## Contributing
 We have not yet set up a process to incorporate changes into the code.   Check back in the future!
