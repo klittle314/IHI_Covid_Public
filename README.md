@@ -119,7 +119,7 @@ starting number of deaths:  at least eight deaths are required in the first phas
 
 shift length:  eight consecutive values above or below the midline of a phase signal a special cause and the start of a new phase.
 
-## Additional Notes
+## Notes on the algorithm
 
 ### flagging and setting aside unusually large values:  ghosting
 The detect_outlier function examines each daily record to assess if the record is unusually large compared to days preceding and following the record.  During spring 2020, we followed news reports of 'data dumps' and flagged these events manually.  Such data dumps are a simple and clear example of a special cause of variation in the data series.  If you adapt the R code for your own use, we recommend that you allow users to identify records that should be excluded from calculations using your knowledge of the reported death series.  In our development team, we refer to records flagged by the detect_outlier function as 'ghosted' because the original PowerBI script plotted such values with a pale dot.
@@ -189,26 +189,15 @@ In model_phase_change, we use the test of significance (p-value) and the sign of
 |   3   | p >= .05:  neither growth nor decay |
 
 
-### Details and limitations of the current method
-**Limit anomaly** In Epoch 3, the log transformation stretches the scale of the control limits when there are multiple days close to zero.   For example, in the Wisconsin raw data (upper limit increase in phase 4 ia above the upper limit in phase 3 despite the average value in phase 4 below the average value in phase 3. Our method implies we could expect occaisionaly  much higher values in phase 4 relative to phase 3 and not declare a change in phase.
+## Details and limitations of the current method
+### Requirement of 21 records to fit the control chart in Epochs 2 and 3 can lead to signals ignored until the end of baseline period   
+Our requirement of 21 records before calculating control limits in Epochs 2 and 3 can lead to special cause signals within the 21 record span. We imposed the 21 record rule to align with typical control chart advice to have 20 records to calculate chart parametersand to allow three weeks of data for the adjustment algorithm. 
 
-![Wisconsin limit anomaly](images/Wisconsin%20limit%20anomaly%202020-11-08_15-56-51.jpg)
-
-**Modification of 'Shewhart criterion 1':  points beyond the control limits and overdispersion**  We modified the Shewhart criterion.  Except for the initial phase of Epoch 1 or Epoch 4, we require two consecutive points beyond the control limits in Epochs 2 and 3 to signal the start of a new phase.  We expect to see more than 'usual' variation in the death series.  We dampen the trigger of a new phase by requiring a stronger signal.  For example, a single large value sometimes reflects a 'data dump' by the reporting entity that is not screened by our ghosting function.
-
-We turn this rule 'off' in Epochs 1 and 4 as we want to flag increases that may be potentially exponential, transition to Epoch 2.
-
-In locations with small counts, the variation sometimes appears more than expected in the Poisson model underlying the c-chart.  More complicated charts based on a distribution like the negative binomial can handle extra dispersion but we elected to stay with c-charts and modify the signal rule.   Idaho in phase 4 illustrates the over-disperson and the consequence of requiring two points above the control limits to indicate a start of a new phase.
-
-![Idaho overdispersion](images/Idaho%20overdispersion%202020-11-08_16-23-37.jpg)
-
-**Requirement of 21 records to fit the control chart in Epochs 2 and 3 can lead to problematic fits**  Our requirement of 21 records before calculating control limits in Epochs 2 and 3 can lead to special cause signals within the 21 record span. We imposed the 21 record rule to align with typical control chart advice to have 20 records to calculate chart parameters and to allow three weeks of data for the adjustment algorithm.  
-
-Our method does not react to the signals within the initial 21 records even though such signals undermine the basis for the control limit calculations.  For example, Turkey shows a signal in the beginning of phase 7, with eight consecutive points above the mid line in records six to sixteen of the phase.  An analyst working by hand might identify the signal of special cause in 11 deaths above the midline and decide not to calculate limits or annotate the phase to indicate the poor fit.
+Our method does not react to the signals within the initial 21 records even though one may argue that such signals undermine the basis for the control limit calculations.  For example, Turkey shows a signal in the beginning of phase 7, with eight consecutive points above the mid line in records six to sixteen of the phase.  An analyst working by hand might identify the signal of special cause in 11 deaths above the midline and decide not to calculate limits or annotate the phase to indicate the poor fit.
 
 ![Turkey signal in baseline](images/Turkey%20signal%20in%20baseline%202020-11-08_16-35-49.jpg)
 
-Similarly, there are two points below the lower limit in the sixth phase of the United States raw death series, at records 16 and 17 in the phase. Our algorithm ignores this signal of special cause in calculating the parameters of for fitting the phase.
+Similarly, there are two points below the lower limit in the sixth phase of the United States raw death series, at records 16 and 17 in the phase. Our algorithm ignores this signal of special cause in calculating the parameters for fitting the phase.
 
 ![US signal in baseline](images/United%20States%20signal%20in%20baseline%202020-11-08_16-47-50.jpg)
 
@@ -216,7 +205,22 @@ The '21 record' requirement can also lead to a run of values below the midline t
 
 ![UK signal in baseline](images/UK%20plot%2017%20Nov%202020%20rule%20of%2021.jpeg)
 
-**Bias induced by the adjustment method**  In Epochs 2 and 3, we set zero values to missing before calculating the model fit on the log10 scale.   Eliminating the zero values has the effect of biasing the fit upwards.   We have not characterized the size of the bias.  An alternative to a linear model fitted to log10 deaths:  fit a Poisson regression, possibly allowing for over-dispersion. Zero values will be handled directly as observed values.  As this is not the approach used in the initial IHI application, we did not pursue this alternative in the current R development.
+### Modification of 'Shewhart criterion 1':  points beyond the control limits and overdispersion  
+We modified the Shewhart criterion.  Except for the initial phase of Epoch 1 or Epoch 4, we require two consecutive points beyond the control limits in Epochs 2 and 3 to signal the start of a new phase.  We expect to see more than 'usual' variation in the death series.  We dampen the trigger of a new phase by requiring a stronger signal.  For example, a single large value sometimes reflects a 'data dump' by the reporting entity that is not screened by our ghosting function.
+
+We turn this rule 'off' in Epochs 1 and 4 as we want to flag increases that may be potentially exponential, transition to Epoch 2.
+
+In locations with small counts, the variation sometimes appears more than expected in the Poisson model underlying the c-chart.  More complicated charts based on a distribution like the negative binomial can handle extra dispersion but we elected to stay with c-charts and modify the signal rule.   Idaho in phase 4 illustrates the over-disperson and the consequence of requiring two points above the control limits to indicate a start of a new phase.
+
+![Idaho overdispersion](images/Idaho%20overdispersion%202020-11-08_16-23-37.jpg)
+
+### Limit anomaly 
+In Epoch 3, the log transformation stretches the scale of the control limits when there are multiple days close to zero.   For example, in the Wisconsin raw data (upper limit increase in phase 4 ia above the upper limit in phase 3 despite the average value in phase 4 below the average value in phase 3. Our method implies we could expect occaisionaly  much higher values in phase 4 relative to phase 3 and not declare a change in phase.
+
+![Wisconsin limit anomaly](images/Wisconsin%20limit%20anomaly%202020-11-08_15-56-51.jpg)
+
+### Bias induced by the adjustment method 
+In Epochs 2 and 3, we set zero values to missing before calculating the model fit on the log10 scale.   Eliminating the zero values has the effect of biasing the fit upwards.   We have not characterized the size of the bias.  An alternative to a linear model fitted to log10 deaths:  fit a Poisson regression, possibly allowing for over-dispersion. Zero values will be handled directly as observed values.  As this is not the approach used in the initial IHI application, we did not pursue this alternative in the current R development.
 
 Also, the adjustment procedure can produce values in the adjusted series that are larger than those in the observed series.  Consider Florida's raw death series, phase 5. ![Florida induced large value](https://github.com/klittle314/IHI_Covid_display_Nov2020/blob/main/images/Florida%20adjusted%202020-11-08_19-50-02.jpg)  Here is the table of relevant values for the Sundays in the series.   
 
