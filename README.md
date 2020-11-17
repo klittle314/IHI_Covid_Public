@@ -28,7 +28,7 @@ In other words, in our application, a phase is a distinct time period described 
 
 A location always starts in Epoch 1.  How do we handle a series with rare deaths associated with Covid after exponential growth and decline?  The algorithm for fitting in Epoch 4 is identical to the logic in Epoch 1.  The only distinction is that Epoch 1 characterizes the start of the death series.
 
-Check the detailed table [here](https://github.com/klittle314/IHI_Covid_display_Nov2020/blob/main/Phase%20and%20Epoch%20logic%209%20November%202020%20public%20version.pdf) to see the rules for transitions from phase to phase within and between epochs.
+Check the detailed table [here](main/Phase%20and%20Epoch%20logic%20public%20version.pdf) to see the rules for transitions from phase to phase within and between epochs.
 
 
 ## Who can use this project?
