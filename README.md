@@ -22,7 +22,7 @@ We use epochs and phases to describe the patterns in Covid death series. We firs
 
 Within any Epoch, we require at least one phase.  For example, within Epoch 1, if the algorithm does not detect exponential growth but shows an increase in average deaths, additional phases will display c-charts with means higher than the first phase.  Here's a display of the state of Arkansas death series showing multiple phases within Epoch 1.   The red dot represents a 'ghosted value', likely associated with an administrative action to report an unusually large number of deaths in one day. Note that in the IHI implementation, red dots are reserved for the start of a new phase; ghosted values are presented as light blue. See below for further discussion of ghosting.
 
-![phases within Epoch 1](https://github.com/klittle314/IHI_Covid_display_Nov2020/blob/main/images/ARkansas%202%20Nov%202020.jpg)
+![phases within Epoch 1](images/ARkansas%202%20Nov%202020.jpg)
 
 In other words, in our application, a phase is a distinct time period described by a distinct control chart.
 
@@ -132,7 +132,7 @@ By June, the development team saw that some locations reported deaths in a syste
 
 For example, Illinois shows a strong pattern of two days a week lower than the other five.  The pattern is easy to see starting in Epoch 3, phase 1:
 
-![Illinois series](https://raw.githubusercontent.com/klittle314/IHI_Covid_display_Nov2020/main/images/Illinois%20Raw%20Deaths%20Seasonality%202020-11-08_13-43-19.jpg)
+![Illinois series](images/Illinois%20Raw%20Deaths%20Seasonality%202020-11-08_13-43-19.jpg)
 
 Illinois raw deaths epoch and phase start dates:
 | Epoch | overall phase | phase within epoch: start date|
@@ -167,7 +167,7 @@ The adjustment logic will fail to adjust some days of the week if the state or c
 
 Louisiana provides a clear example of the situation, with reported deaths on Saturdays identically zero for three months starting in July:
 
-![Saturday pattern](https://github.com/klittle314/IHI_Covid_display_Nov2020/blob/main/images/Louisiana%20Raw%20Deaths%20Seasonality%202020-11-08_15-25-54.jpg)
+![Saturday pattern](images/Louisiana%20Raw%20Deaths%20Seasonality%202020-11-08_15-25-54.jpg)
 
 In the Louisiana case, our adjustment actually seems to work well: from the data series, it appears that Louisiana is reporting only six days each week for weeks starting in mid-summer and model fits accommodate this structure. 
 
@@ -192,7 +192,7 @@ In model_phase_change, we use the test of significance (p-value) and the sign of
 ### Details and limitations of the current method
 **Limit anomaly** In Epoch 3, the log transformation stretches the scale of the control limits when there are multiple days close to zero.   For example, in the Wisconsin raw data (upper limit increase in phase 4 ia above the upper limit in phase 3 despite the average value in phase 4 below the average value in phase 3. Our method implies we could expect occaisionaly  much higher values in phase 4 relative to phase 3 and not declare a change in phase.
 
-![Wisconsin limit anomaly](https://github.com/klittle314/IHI_Covid_display_Nov2020/blob/main/images/Wisconsin%20limit%20anomaly%202020-11-08_15-56-51.jpg)
+![Wisconsin limit anomaly](images/Wisconsin%20limit%20anomaly%202020-11-08_15-56-51.jpg)
 
 **Modification of 'Shewhart criterion 1':  points beyond the control limits and overdispersion**  We modified the Shewhart criterion.  Except for the initial phase of Epoch 1 or Epoch 4, we require two consecutive points beyond the control limits in Epochs 2 and 3 to signal the start of a new phase.  We expect to see more than 'usual' variation in the death series.  We dampen the trigger of a new phase by requiring a stronger signal.  For example, a single large value sometimes reflects a 'data dump' by the reporting entity that is not screened by our ghosting function.
 
@@ -200,21 +200,21 @@ We turn this rule 'off' in Epochs 1 and 4 as we want to flag increases that may 
 
 In locations with small counts, the variation sometimes appears more than expected in the Poisson model underlying the c-chart.  More complicated charts based on a distribution like the negative binomial can handle extra dispersion but we elected to stay with c-charts and modify the signal rule.   Idaho in phase 4 illustrates the over-disperson and the consequence of requiring two points above the control limits to indicate a start of a new phase.
 
-![Idaho overdispersion](https://github.com/klittle314/IHI_Covid_display_Nov2020/blob/main/images/Idaho%20overdispersion%202020-11-08_16-23-37.jpg)
+![Idaho overdispersion](images/Idaho%20overdispersion%202020-11-08_16-23-37.jpg)
 
 **Requirement of 21 records to fit the control chart in Epochs 2 and 3 can lead to problematic fits**  Our requirement of 21 records before calculating control limits in Epochs 2 and 3 can lead to special cause signals within the 21 record span. We imposed the 21 record rule to align with typical control chart advice to have 20 records to calculate chart parameters and to allow three weeks of data for the adjustment algorithm.  
 
 Our method does not react to the signals within the initial 21 records even though such signals undermine the basis for the control limit calculations.  For example, Turkey shows a signal in the beginning of phase 7, with eight consecutive points above the mid line in records six to sixteen of the phase.  An analyst working by hand might identify the signal of special cause in 11 deaths above the midline and decide not to calculate limits or annotate the phase to indicate the poor fit.
 
-![Turkey signal in baseline](https://github.com/klittle314/IHI_Covid_display_Nov2020/blob/main/images/Turkey%20signal%20in%20baseline%202020-11-08_16-35-49.jpg)
+![Turkey signal in baseline](images/Turkey%20signal%20in%20baseline%202020-11-08_16-35-49.jpg)
 
 Similarly, there are two points below the lower limit in the sixth phase of the United States raw death series, at records 16 and 17 in the phase. Our algorithm ignores this signal of special cause in calculating the parameters of for fitting the phase.
 
-![US signal in baseline](https://github.com/klittle314/IHI_Covid_display_Nov2020/blob/main/images/United%20States%20signal%20in%20baseline%202020-11-08_16-47-50.jpg)
+![US signal in baseline](images/United%20States%20signal%20in%20baseline%202020-11-08_16-47-50.jpg)
 
 The '21 record' requirement can also lead to a run of values below the midline that is greater than 8 before signal of a new phase.   For example, here is a view of the United Kingdom that shows a run of nine values below baseline before the start of the next phase.   The next phase is in fact triggered by two consecutive points below the lower limit from the previous phase calculations, based on 21 records in the calculations.
 
-![UK signal in baseline]()
+![UK signal in baseline](images/UK%20plot%2017%20Nov%202020%20rule%20of%2021.jpeg)
 
 **Bias induced by the adjustment method**  In Epochs 2 and 3, we set zero values to missing before calculating the model fit on the log10 scale.   Eliminating the zero values has the effect of biasing the fit upwards.   We have not characterized the size of the bias.  An alternative to a linear model fitted to log10 deaths:  fit a Poisson regression, possibly allowing for over-dispersion. Zero values will be handled directly as observed values.  As this is not the approach used in the initial IHI application, we did not pursue this alternative in the current R development.
 
