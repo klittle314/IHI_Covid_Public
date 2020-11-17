@@ -128,7 +128,7 @@ The detect_outlier function examines each daily record to assess if the record i
 The New York Times data table provides cumulative death counts for each U.S. state or territory.  The code differences the cumulative death series to get daily deaths.  The cumulative death count series shows adjustments for 27 states and territories as of 8 November that make the series non-monotone increasing--52 records are less than previous records, within state or territory.  This means that the differenced series will have negative values.   To eliminate negative deaths in the differenced series, the function allocates the negative values to previous records so that the revised series has only non-negative values.
 
 ### adjusting
-By June, the development team saw that some locations reported deaths in a way that two days a week tended to be lower than the other five days in each calendar week.  As a result, the IHI application adjusted for a day-of-week effect.  We developed the R code to mimic the IHI application:  the R code generates adjusted data for each location.  The adjusted data series is then used as input to the epochs and phases algorithm.
+By June, the development team saw that some locations reported deaths in a systematic way:  one or two days a week tended to be lower than the other six or five days in each calendar week.  As a result, the IHI application adjusted for a day-of-week effect.  We developed the R code to mimic the IHI application:  the R code generates adjusted data for each location.  The adjusted data series is then used as input to the epochs and phases algorithm.
 
 For example, Illinois shows a strong pattern of two days a week lower than the other five.  The pattern is easy to see starting in Epoch 3, phase 1:
 
@@ -194,9 +194,9 @@ In model_phase_change, we use the test of significance (p-value) and the sign of
 
 ![Wisconsin limit anomaly](https://github.com/klittle314/IHI_Covid_display_Nov2020/blob/main/images/Wisconsin%20limit%20anomaly%202020-11-08_15-56-51.jpg)
 
-**Modification of 'Shewhart criterion 1':  points beyond the control limits and overdispersion**  We modified the Shewhart criterion.  Except for the initial phase of Epoch 1 or Epoch 4, we require two points above the control limits in Epochs 2 and 3 to signal the start of a new phase.  We expect to see more than 'usual' variation in the death series.  We dampen the trigger of a new phase by requiring a stronger signal.  For example, a single large value sometimes reflects a 'data dump' by the reporting entity that is not screened by our ghosting function.
+**Modification of 'Shewhart criterion 1':  points beyond the control limits and overdispersion**  We modified the Shewhart criterion.  Except for the initial phase of Epoch 1 or Epoch 4, we require two consecutive points beyond the control limits in Epochs 2 and 3 to signal the start of a new phase.  We expect to see more than 'usual' variation in the death series.  We dampen the trigger of a new phase by requiring a stronger signal.  For example, a single large value sometimes reflects a 'data dump' by the reporting entity that is not screened by our ghosting function.
 
-Similarly, we require two points below the lower limit in Epochs 2 and 3.   We turn this rule 'off' in Epochs 1 and 4 as we found the combination of within week seasonality (pattern of two days low each week) and presence of zero values tended to generate numerous phase changes that did not appear to reflect the system performance.
+We turn this rule 'off' in Epochs 1 and 4 as we want to flag increases that may be potentially exponential, transition to Epoch 2.
 
 In locations with small counts, the variation sometimes appears more than expected in the Poisson model underlying the c-chart.  More complicated charts based on a distribution like the negative binomial can handle extra dispersion but we elected to stay with c-charts and modify the signal rule.   Idaho in phase 4 illustrates the over-disperson and the consequence of requiring two points above the control limits to indicate a start of a new phase.
 
@@ -211,6 +211,8 @@ Our method does not react to the signals within the initial 21 records even thou
 Similarly, there are two points below the lower limit in the sixth phase of the United States raw death series, at records 16 and 17 in the phase. Our algorithm ignores this signal of special cause in calculating the parameters of for fitting the phase.
 
 ![US signal in baseline](https://github.com/klittle314/IHI_Covid_display_Nov2020/blob/main/images/United%20States%20signal%20in%20baseline%202020-11-08_16-47-50.jpg)
+
+The '21 record' requirement can also lead to a run of values below the midline that is greater than 8 before signal of a new phase.   For example, here is a view of the United Kingdom:
 
 **Bias induced by the adjustment method**  In Epochs 2 and 3, we set zero values to missing before calculating the model fit on the log10 scale.   Eliminating the zero values has the effect of biasing the fit upwards.   We have not characterized the size of the bias.  An alternative to a linear model fitted to log10 deaths:  fit a Poisson regression, possibly allowing for over-dispersion. Zero values will be handled directly as observed values.  As this is not the approach used in the initial IHI application, we did not pursue this alternative in the current R development.
 
