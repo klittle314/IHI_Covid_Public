@@ -244,14 +244,16 @@ Thus, we have problems with both the raw series and the adjusted series.  The ra
 
 We include a copy of the input CSV files as of 13 November 2020 for both country and U.S. states and territories. 
 
-To avoid overwriting the output files provided for your test, copy the contents of the samples folder and output folder into renamed folders.
+To avoid overwriting the output files provided for your test, copy the contents of the samples folder and output folder into renamed folders, e.g. 13Nov_samples and 13Nov_output. 
+
+*If you do not copy the contents of these folders, the code will overwrite the existing files.*
 
 In the generate-date-files.R script, replace the lines
 ```
 data_file_country <- paste0('data/country_data_', as.character(Sys.Date()), '.csv')
 data_file_state   <- paste0('data/us_state_data_', as.character(Sys.Date()), '.csv')`
 ```
-with
+with path to your renamed folder
 ```
 data_file_country <- paste0('data/country_data_2020-11-13.csv')
 data_file_state   <- paste0('data/us_state_data_2020-11-13.csv)
@@ -270,6 +272,8 @@ And you should see five CSV files in the output folder that drive the IHI PowerB
 - Dates by Phase II.csv
 - NYT Daily MultiPhase ADJ.csv
 - NYT Daily MultiPhase.csv
+
+Compare the output files just generated to the output files we provided. 
 
 ## Contributing
 We have not yet set up a process to incorporate changes into the code.   Check back in the future!
