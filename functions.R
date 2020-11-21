@@ -468,8 +468,17 @@ find_phase_dates <- function(
                 epoch_phase <- 1
                 
               } else if (epoch == 3) {
+              
+                # Epoch 4 requires:
+                # 1. current phase LCL < 2, AND
+                #   2a. phase change due to points below UCL, OR
+                #   2b. phase change due to streak below midline (residual sign -1)
+                # This excludes phase changes due to an uptick in cases.
+                epoch_4 <- phase_parameters$lcl < 2 &&
+                          (length(date_below_ucl) == 1 ||
+                          (length(date_streak) == 1 && streak_sign == -1))
                 
-                if (phase_parameters$lcl < 2) {
+                if (epoch_4) {
                   epoch <- 4
                   epoch_phase <- 1
                 }
