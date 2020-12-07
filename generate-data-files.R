@@ -42,7 +42,7 @@ df_state <- read.csv(data_file_state,
 df_state$datex <- as.Date(df_state$date)
 
 df_state <- df_state[order(df_state$state, df_state$datex), ]
-df_state$New_Deaths     <- ave(df_state$deaths, df_state$state, FUN = function(x) { c(0, diff(x)) })
+df_state$New_Deaths     <- ave(df_state$deaths, df_state$state, FUN = function(x) { c(x[1], diff(x)) })
 df_state$New_Deaths_max <- ave(df_state$New_Deaths, df_state$state, FUN = max)
 df_state$level          <- 'state'
 
