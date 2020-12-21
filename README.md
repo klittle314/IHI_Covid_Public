@@ -150,7 +150,7 @@ Observing this pattern in multiple data series, we sought to eliminate the speci
 
 Here's the logic for adjustment:
 
-1.  Fit the original ("raw") series to obstain phases and epochs.
+1.  Fit the original ("raw") series to obtain phases and epochs.
 2.  Within each fitted phase with at least 21 records for Epochs 2 and 3 and using the linear fit to the log10 deaths:
 (a) compute the residuals as (observed - midline) on the log10 scale.  
 (b) by day of week, get the median of the residuals.   This is the adjustment for day of week.
