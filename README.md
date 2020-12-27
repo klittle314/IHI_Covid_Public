@@ -224,7 +224,7 @@ In locations with small counts, the variation sometimes appears more than expect
 ![Idaho overdispersion](images/Idaho%20overdispersion%202020-11-08_16-23-37.jpg)
 
 ### Limit anomaly 
-In Epoch 3, the log transformation stretches the scale of the control limits when there are multiple days close to zero.   For example, in the Wisconsin raw data (upper limit increase in phase 4 ia above the upper limit in phase 3 despite the average value in phase 4 below the average value in phase 3. Our method implies we could expect occaisionaly  much higher values in phase 4 relative to phase 3 and not declare a change in phase.
+In Epoch 3, the log transformation stretches the scale of the control limits when there are multiple days close to zero.   For example, in the Wisconsin raw data (upper limit increase in phase 4 ia above the upper limit in phase 3 despite the average value in phase 4 below the average value in phase 3. Our method implies we could expect occasionaly much higher values in phase 4 relative to phase 3 and not declare a change in phase.
 
 ![Wisconsin limit anomaly](images/Wisconsin%20limit%20anomaly%202020-11-08_15-56-51.jpg)
 
