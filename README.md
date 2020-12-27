@@ -51,7 +51,7 @@ data_file_state   <- paste0('data/us_state_data_', as.character(Sys.Date()), '.c
 
 
 if (!file.exists(data_file_country)) {
-  covid_data <- httr::GET("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", 
+  covid_data <- httr::GET("https://covid.ourworldindata.org/data/owid-covid-data.csv", 
                           authenticate(":", ":", type="ntlm"),
                           write_disk(data_file_country, overwrite=TRUE))
 }
@@ -61,11 +61,11 @@ if (!file.exists(data_file_state)) {
                 destfile = data_file_state)
 }
 ```
+Prior to 2020-12-15, country data came from a European Union data source.   The EU switched to weekly data starting 2020-12-17, so our source for daily data also switched.   We use the [One World In Data data source](https://ourworldindata.org/covid-deaths), which is based on data maintained by Johns Hopkins.
+
 ### Copying the code for local use
 
-
 [Click here to download this repository as a zip file](https://github.com/klittle314/IHI_Covid_Public/zipball/main) 
-
 
 Alternatively, if you understand how repositories work, you can fork the master branch for your use.
 
