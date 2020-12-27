@@ -25,6 +25,11 @@ df_country <- read.csv(data_file_country,
 #remove NA values at the start of the series
 
 df_country <- df_country[!is.na(df_country$total_deaths), ]
+
+#omit World
+
+df_country <- df_country[df_country$location != "World",]
+
 #df_country$state          <- df_country$countriesAndTerritories
 df_country$state          <- df_country$location
 #df_country$datex          <- as.Date(df_country$dateRep, format = '%d/%m/%Y')
