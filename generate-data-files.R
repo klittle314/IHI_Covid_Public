@@ -12,7 +12,8 @@ defBuffer <- 7
 defBaseline <- 20
 
 if (!file.exists(data_file_country)) {
-  covid_data <- httr::GET("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", 
+  #covid_data <- httr::GET("https://opendata.ecdc.europa.eu/covid19/casedistribution/csv", 
+  covid_data <- httr::GET("https://covid.ourworldindata.org/data/owid-covid-data.csv",
                           authenticate(":", ":", type="ntlm"),
                           write_disk(data_file_country, overwrite=TRUE))
 }
@@ -21,9 +22,15 @@ df_country <- read.csv(data_file_country,
                        header = TRUE,
                        stringsAsFactors = FALSE)
 
-df_country$state          <- df_country$countriesAndTerritories
-df_country$datex          <- as.Date(df_country$dateRep, format = '%d/%m/%Y')
-df_country$New_Deaths     <- df_country$deaths
+#remove NA values at the start of the series
+
+df_country <- df_country[!is.na(df_country$total_deaths), ]
+#df_country$state          <- df_country$countriesAndTerritories
+df_country$state          <- df_country$location
+#df_country$datex          <- as.Date(df_country$dateRep, format = '%d/%m/%Y')
+df_country$datex          <- as.Date(df_country$date, format = '%Y-%m-%d')
+#df_country$New_Deaths    <- df_country$deaths
+df_country$New_Deaths     <- ave(df_country$total_deaths, df_country$state, FUN = function(x) { c(x[1], diff(x)) })
 df_country$New_Deaths_max <- ave(df_country$New_Deaths, df_country$state, FUN = max)
 df_country$level          <- 'country'
 
