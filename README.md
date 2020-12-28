@@ -190,9 +190,7 @@ In model_phase_change, we use the test of significance (p-value) and the sign of
 
 
 
-### Details and limitations of the current method
-**Limit anomaly** In Epoch 3, the log transformation stretches the scale of the control limits when there are multiple days close to zero.   For example, in the Wisconsin raw data (upper limit increase in phase 4 ia above the upper limit in phase 3 despite the average value in phase 4 below the average value in phase 3. Our method implies we could expect occasionaly much higher values in phase 4 relative to phase 3 and not declare a change in phase.
-
+## Details and limitations of the current method
 
 ### Requirement of 21 records to fit the control chart in Epochs 2 and 3 can lead to apparent control chart signals that are ignored   
 Our requirement of 21 records before calculating control limits in Epochs 2 and 3 can lead to special cause signals within the 21 record span. We imposed the 21 record rule to align with typical control chart advice to have 20 records to calculate chart parameters and to allow three weeks of data for the adjustment algorithm. Our requirement of 21 records tends to reduce the number of phases in a series relative to code that does not impose the requirement.
@@ -219,7 +217,7 @@ In locations with small counts, the variation sometimes appears more than expect
 ![Idaho overdispersion](images/Idaho%20overdispersion%202020-11-08_16-23-37.jpg)
 
 ### Limit anomaly 
-In Epoch 3, the log transformation stretches the scale of the control limits when there are multiple days close to zero.   For example, in the Wisconsin raw data (upper limit increase in phase 4 ia above the upper limit in phase 3 despite the average value in phase 4 below the average value in phase 3. Our method implies we could expect occaisionaly  much higher values in phase 4 relative to phase 3 and not declare a change in phase.
+In Epoch 3, the log transformation stretches the scale of the control limits when there are multiple days close to zero.   For example, in the Wisconsin raw data (upper limit increase in phase 4 ia above the upper limit in phase 3 despite the average value in phase 4 below the average value in phase 3. Our method implies we could expect occasionally much higher values in phase 4 relative to phase 3 and not declare a change in phase.
 
 ![Wisconsin limit anomaly](images/Wisconsin%20limit%20anomaly%202020-11-08_15-56-51.jpg)
 
