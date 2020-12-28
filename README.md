@@ -1,5 +1,5 @@
 # R scripts to generate control chart limits used by IHI's PowerBI application
-Notes by [Kevin Little](mailto:klittle@iecodesign.com?subject=[GitHub]IHI_Covid_display_Nov2020), Ph.D., Informing Ecological Design, LLC last updated 26 December 2020
+Notes by [Kevin Little](mailto:klittle@iecodesign.com?subject=[GitHub]IHI_Covid_display_Nov2020), Ph.D., Informing Ecological Design, LLC last updated 28 December 2020
 
 This project implements a method based on control charts to view phases in daily reported deaths from COVID-19. The method was developed by Lloyd Provost, Shannon Provost, Rocco Perla, Gareth Parry, and Kevin Little, with an initial focus on death series and is described [here](https://academic.oup.com/intqhc/advance-article/doi/10.1093/intqhc/mzaa069/5863166).
 
