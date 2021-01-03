@@ -1,13 +1,13 @@
-# R scripts to generate control chart limits used by IHI's PowerBI application
-Notes by [Kevin Little](mailto:klittle@iecodesign.com?subject=[GitHub]IHI_Covid_display_Nov2020), Ph.D., Informing Ecological Design, LLC last updated 28 December 2020
+# R scripts to generate chart limits used by IHI's PowerBI application
+Notes by [Kevin Little](mailto:klittle@iecodesign.com?subject=[GitHub]IHI_Covid_display_Nov2020), Ph.D., Informing Ecological Design, LLC last updated 3 January 2021
 
-This project implements a method based on control charts to view phases in daily reported deaths from COVID-19. The method was developed by Lloyd Provost, Shannon Provost, Rocco Perla, Gareth Parry, and Kevin Little, with an initial focus on death series and is described [here](https://academic.oup.com/intqhc/advance-article/doi/10.1093/intqhc/mzaa069/5863166).
+This project implements a method based on Shewhart charts to view phases in daily reported deaths from COVID-19. The method was developed by Lloyd Provost, Shannon Provost, Rocco Perla, Gareth Parry, and Kevin Little, with an initial focus on death series and is described [here](https://academic.oup.com/intqhc/advance-article/doi/10.1093/intqhc/mzaa069/5863166).
 
 Gareth Parry used SPSS to develop the initial IHI presentation in the spring and summer of 2020.  His SPSS code created data tables for countries and U.S. states and territories.  Gareth created a PowerBI script to read these tables and created the data displays.  The IHI display is [here](http://www.ihi.org/Topics/COVID-19/Pages/COVID-19-Data-Dashboard.aspx). 
 
 In September, Kevin Little advised by Lloyd Provost replaced the SPSS code with R code that requires less daily human intervention.   This document describes the R code function and limitations.  The PowerBI visualization may undergo revision in the near future.
 
-## The foundation of our control chart modeling:  Epochs and phases
+## The foundation of our Shewhart chart modeling:  Epochs and phases
 Epidemiologists use the term 'phases' to describe the structure of a pandemic.  The [core WHO pandemic reference](https://www.ncbi.nlm.nih.gov/books/NBK143061/) for example says: "The WHO pandemic phases were developed in 1999 and revised in 2005. The phases are applicable to the entire world and provide a global framework to aid countries in pandemic preparedness and response planning." 
 
 We use epochs and phases to describe the patterns in Covid death series. We first observed the patterns in the death series for locations like China and New York in the United States in late winter and early spring 2020.  As our use of the term phase is potentially confusing to users familiar with WHO terminology, let's explain.
@@ -24,7 +24,7 @@ Within any Epoch, we require at least one phase.  For example, within Epoch 1, i
 
 ![phases within Epoch 1](images/ARkansas%202%20Nov%202020.jpg)
 
-In other words, in our application, a phase is a distinct time period described by a distinct control chart.
+In other words, in our application, a phase is a distinct time period described by a distinct Shewhart chart.
 
 A location always starts in Epoch 1.  How do we handle a series with rare deaths associated with Covid after exponential growth and decline?  The algorithm for fitting in Epoch 4 is identical to the logic in Epoch 1.  The only distinction is that Epoch 1 characterizes the start of the death series.
 
@@ -33,7 +33,7 @@ Check the detailed table [here](Phase%20and%20Epoch%20logic%20public%20version.p
 
 ## Who can use this project?
 
-People who have a basic understanding of Shewhart control charts and want to apply control chart methods to characterize how reported events from COVID-19 change over time.  People who have skills in R can modify the code in order to load data sources to replace the built-in sources and to consider other measures, like hospitalizations or ICU cases.
+People who have a basic understanding of Shewhart charts and want to apply Shewhart chart methods to characterize how reported events from COVID-19 change over time.  People who have skills in R can modify the code in order to load data sources to replace the built-in sources and to consider other measures, like hospitalizations or ICU cases.
 
 ## Getting Started
 
@@ -104,18 +104,18 @@ The core files are
       - Output: a list that contains the linear model fit to the raw data values; the average log10 deaths; a logical value indicating the sign (plus or minus) of the slope of the log10 linear model; a logical value indicating whether or not the slope of the log10 linear model is statistically significant (p < .05); the median moving range of the residuals from the linear model fit.
     - find_phase_dates, a function that does the 'heavy lifting'; this function checks for beginning and end of phases and generates the control chart parameters for each phase.  It also adjusts for within-week seasonality in Epochs 2 and 3.
       - Inputs:  a data frame with the death series and indicators of ghosted data, by location; a logical variable to adjust the data for within week seasonality; a logical variable to look for ghosted values.
-      - Output:  a data frame that appends new columns to the input data frame:  indicators of epochs and phases within epochs, start dates for phases; control chart parameters (midline and upper and lower control imits) for each phase.
+      - Output:  a data frame that appends new columns to the input data frame:  indicators of epochs and phases within epochs, start dates for phases; Shewhart chart parameters (midline and upper and lower limits) for each phase.
 
 If you run the generate_data_files.R in interactive mode, the code will create pdf files containing plots of the raw and adjusted death series for countries and U.S. states and territories.   The code will also print out the a table of phases and Epochs for each location.
       
 ### Key parameters
 These parameters are currently 'hard-coded' but should be expressed as parameters for generalization and sensitivity testing.
 
-minimum control-chart length:  at least five records in Epochs 1 and 4 to estimate parameters.  In Epochs 2 and 3, we require 21 records to estimate parameters.  If the exponential fit in Epochs 2 or 3 is being tested with the most current records, we require a minimum of five non-zero records for a preliminary fit.    
+minimum chart length:  at least five records in Epochs 1 and 4 to estimate parameters.  In Epochs 2 and 3, we require 21 records to estimate parameters.  If the exponential fit in Epochs 2 or 3 is being tested with the most current records, we require a minimum of five non-zero records for a preliminary fit.    
 
-maximum length of series to establish control chart limits:  21 records, corresponding to three calendar weeks.
+maximum length of series to establish chart limits:  21 records, corresponding to three calendar weeks.
 
-starting number of deaths:  at least eight deaths are required in the first phase of Epochs 1 and 4 to estimate control chart parameters.  This parameter accounts for the potentially large number of days with zero deaths the first phase of Epochs 1 and 4.
+starting number of deaths:  at least eight deaths are required in the first phase of Epochs 1 and 4 to estimate chart parameters.  This parameter accounts for the potentially large number of days with zero deaths the first phase of Epochs 1 and 4.
 
 shift length:  eight consecutive values above or below the midline of a phase signal a special cause and the start of a new phase.
 
@@ -144,7 +144,7 @@ Illinois raw deaths epoch and phase start dates:
 | Epoch 3 | phase 5 overall | phase 3 within epoch: 2020-07-05|
 | Epoch 3 | phase 6 overall | phase 4 within epoch: 2020-10-06|
  
-The excerpt of the Illinois data records shows that deaths reported on Sunday and Monday are systematically lower than the other days of the week.  This appears to be an administrative source of variation in the death series, a special cause of variation, which will affect the control limits. Two low values each week will tend to inflate the variation and widen the control limits.  
+The excerpt of the Illinois data records shows that deaths reported on Sunday and Monday are systematically lower than the other days of the week.  This appears to be an administrative source of variation in the death series, a special cause of variation, which will affect the chart limits. Two low values each week will tend to inflate the variation and widen the chart limits.  
 
 Observing this pattern in multiple data series, we sought to eliminate the special cause of variation.  We limited the adjustment to data within Epochs 2 and 3 as the control limits are derived from the range of the day to day differences.  In Epochs 1 and 4, we did not apply the adjustment; the c-charts are defined solely by the average value of the series and may be dominated by many days with zero deaths.
 
@@ -172,12 +172,12 @@ Louisiana provides a clear example of the situation, with reported deaths on Sat
 In the Louisiana case, our adjustment actually seems to work well: from the data series, it appears that Louisiana is reporting only six days each week for weeks starting in mid-summer and model fits accommodate this structure. 
 
 ### Computations related to the c-chart
-The function find_phase_dates calculates the c-chart center line and upper control limit in Epochs 1 and 4.  As described above, the c-chart calculations are based on several other parameters.  The c-chart calculations require at least 8 non-zero deaths; the maximum number of records used for the c-chart calculations is 21.  As the find_phase_dates function iterates through the records, the calculation stops as soon as a special cause signal is detected.  We designed the c-chart calculations to identify the tentative starting point of exponential growth and recognize this approach might not reproduce the c-chart designed by an analyst to look at a sequence of events.  An analyst might require a minimum number of records (e.g. 15 or 20) and iteratively remove points that generate special cause signal(s).  See the additional discussion below on the difference between the rules used in the first phase of Epoch 1 or 4 and subsequent phases within those epochs.  The detailed table [here](Phase%20and%20Epoch%20logic%20public%20version.pdf) summarizes our rules for transitions from phase to phase within and between epochs.
+The function find_phase_dates calculates the c-chart center line and upper chart limit in Epochs 1 and 4.  As described above, the c-chart calculations are based on several other parameters.  The c-chart calculations require at least 8 non-zero deaths; the maximum number of records used for the c-chart calculations is 21.  As the find_phase_dates function iterates through the records, the calculation stops as soon as a special cause signal is detected.  We designed the c-chart calculations to identify the tentative starting point of exponential growth and recognize this approach might not reproduce the c-chart designed by an analyst to look at a sequence of events.  An analyst might require a minimum number of records (e.g. 15 or 20) and iteratively remove points that generate special cause signal(s).  See the additional discussion below on the difference between the rules used in the first phase of Epoch 1 or 4 and subsequent phases within those epochs.  The detailed table [here](Phase%20and%20Epoch%20logic%20public%20version.pdf) summarizes our rules for transitions from phase to phase within and between epochs.
 
 ### Computations related to the fit of the regression line
 
 #### Calculation of the control chart limits using residuals from linear regression on log10 deaths
-The code uses the median moving range to estimate 'sigma-hat' in the calculation of the individuals control chart parameters.  That's why we use the multiplier 3.14 to compute the upper and lower control limits rather than the customary 2.66 value.  The median moving range is more robust to one or two large point-to-point ranges relative to the average moving range.  Usually, use of the average moving range requires two stages:  examine moving ranges to determine if there are any that are unusually large on a chart of moving ranges; discard any ranges that exceed the upper control limit on the range chart, and recalculate the limits on the individuals chart.  We chose to use the median approach to simplify the derivation of the individuals control chart limits.
+The code uses the median moving range to estimate 'sigma-hat' in the calculation of the individuals chart parameters.  That's why we use the multiplier 3.14 to compute the upper and lower limits rather than the customary 2.66 value.  The median moving range is more robust to one or two large point-to-point ranges relative to the average moving range.  Usually, use of the average moving range requires two stages:  examine moving ranges to determine if there are any that are unusually large on a chart of moving ranges; discard any ranges that exceed the upper limit on the range chart, and recalculate the limits on the individuals chart.  We chose to use the median approach to simplify the derivation of the individuals chart limits.
 
 #### Use of test of significance for the slope of the regression fit on log10 deaths
 In model_phase_change, we use the test of significance (p-value) and the sign of the serial day coefficient to determine exponential growth, no evidence of growth or decay, or exponential decline. 
@@ -192,10 +192,10 @@ In model_phase_change, we use the test of significance (p-value) and the sign of
 
 ## Details and limitations of the current method
 
-### Requirement of 21 records to fit the control chart in Epochs 2 and 3 can lead to apparent control chart signals that are ignored   
-Our requirement of 21 records before calculating control limits in Epochs 2 and 3 can lead to special cause signals within the 21 record span. We imposed the 21 record rule to align with typical control chart advice to have 20 records to calculate chart parameters and to allow three weeks of data for the adjustment algorithm. Our requirement of 21 records tends to reduce the number of phases in a series relative to code that does not impose the requirement.
+### Requirement of 21 records to fit the chart in Epochs 2 and 3 can lead to apparent chart signals that are ignored   
+Our requirement of 21 records before calculating limits in Epochs 2 and 3 can lead to special cause signals within the 21 record span. We imposed the 21 record rule to align with typical control chart advice to have 20 records to calculate chart parameters and to allow three weeks of data for the adjustment algorithm. Our requirement of 21 records tends to reduce the number of phases in a series relative to code that does not impose the requirement.
 
-Our method does not react to the signals within the initial 21 records even though one may argue that such signals undermine the basis for the control limit calculations.  For example, Turkey shows a signal in the beginning of phase 7, with eight consecutive points above the mid line in records six to sixteen of the phase.  An analyst working by hand might identify the signal of special cause in 11 deaths above the midline and decide not to calculate limits or annotate the phase to indicate the poor fit.
+Our method does not react to the signals within the initial 21 records even though one may argue that such signals undermine the basis for the limit calculations.  For example, Turkey shows a signal in the beginning of phase 7, with eight consecutive points above the mid line in records six to sixteen of the phase.  An analyst working by hand might identify the signal of special cause in 11 deaths above the midline and decide not to calculate limits or annotate the phase to indicate the poor fit.
 
 ![Turkey signal in baseline](images/Turkey%20signal%20in%20baseline%202020-11-08_16-35-49.jpg)
 
@@ -208,16 +208,16 @@ The '21 record' requirement can also lead to a run of values below the midline t
 ![UK signal in baseline](images/UK%20plot%2017%20Nov%202020%20rule%20of%2021.jpeg)
 
 ### Modification of 'Shewhart criterion 1':  points beyond the control limits and overdispersion  
-We modified the Shewhart criterion.  Except for the initial phase of Epoch 1 or Epoch 4, we require two consecutive points beyond the control limits in Epochs 2 and 3 to signal the start of a new phase.  We expect to see more than 'usual' variation in the death series.  We dampen the trigger of a new phase by requiring a stronger signal.  For example, a single large value sometimes reflects a 'data dump' by the reporting entity that is not screened by our ghosting function.
+We modified the Shewhart criterion.  Except for the initial phase of Epoch 1 or Epoch 4, we require two consecutive points beyond the limits in Epochs 2 and 3 to signal the start of a new phase.  We expect to see more than 'usual' variation in the death series.  We dampen the trigger of a new phase by requiring a stronger signal.  For example, a single large value sometimes reflects a 'data dump' by the reporting entity that is not screened by our ghosting function.
 
 We turn this rule 'off' in Epochs 1 and 4 as we want to flag increases that may be potentially exponential, transition to Epoch 2.
 
-In locations with small counts, the variation sometimes appears more than expected in the Poisson model underlying the c-chart.  More complicated charts based on a distribution like the negative binomial can handle extra dispersion but we elected to stay with c-charts and modify the signal rule.   Idaho in phase 4 illustrates the over-disperson and the consequence of requiring two points above the control limits to indicate a start of a new phase.
+In locations with small counts, the variation sometimes appears more than expected in the Poisson model underlying the c-chart.  More complicated charts based on a distribution like the negative binomial can handle extra dispersion but we elected to stay with c-charts and modify the signal rule.   Idaho in phase 4 illustrates the over-disperson and the consequence of requiring two points above the limits to indicate a start of a new phase.
 
 ![Idaho overdispersion](images/Idaho%20overdispersion%202020-11-08_16-23-37.jpg)
 
 ### Limit anomaly 
-In Epoch 3, the log transformation stretches the scale of the control limits when there are multiple days close to zero.   For example, in the Wisconsin raw data (upper limit increase in phase 4 ia above the upper limit in phase 3 despite the average value in phase 4 below the average value in phase 3. Our method implies we could expect occasionally much higher values in phase 4 relative to phase 3 and not declare a change in phase.
+In Epoch 3, the log transformation stretches the scale of the limits when there are multiple days close to zero.   For example, in the Wisconsin raw data (upper limit increase in phase 4 ia above the upper limit in phase 3 despite the average value in phase 4 below the average value in phase 3. Our method implies we could expect occasionally much higher values in phase 4 relative to phase 3 and not declare a change in phase.
 
 ![Wisconsin limit anomaly](images/Wisconsin%20limit%20anomaly%202020-11-08_15-56-51.jpg)
 
@@ -240,7 +240,7 @@ Also, the adjustment procedure can produce values in the adjusted series that ar
 
 All of the log10 residuals are negative except for the record on 11 October.  Hence the median residual is negative, -0.4215182.  The adjustment rule sets the adjusted deaths as 10^(log10_Deaths - adjustment).   For 11 October, this leads to a raw adjusted value of 469.8272 = 10^(2.2504200 + 0.4215182).  The adjustment algorithm then normalizes the adjusted death series in the phase to have the same total number of deaths as the raw total deaths, which increases the value to 523.   This value is almost twice the value of the maximum observed deaths.
 
-Thus, we have problems with both the raw series and the adjusted series.  The raw data series can show a systematic pattern day-of-week reporting; that is, the series can have a special cause of variation arising from measurement reporting that may affect the control limits. On the other hand, the adjusted data has an upward bias in the model fit and may induce records larger than any observed in the raw data.  Here's my current view:  The message in the charts should be an interpolation between the ‘raw’ and the ‘adjusted’ displays.   A display that incorporates adjusted data should allow the user also to see the raw data to make a considered interpretation.  "Presentation of results, to be optimally useful, and to be good science, must conform to Shewhart’s rule: viz., preserve, for the uses intended, all the evidence in the original data.” (W.E. Deming, “On probability as a basis for action”, *American Statistician*, **29**, No. 4., 148)
+Thus, we have problems with both the raw series and the adjusted series.  The raw data series can show a systematic pattern day-of-week reporting; that is, the series can have a special cause of variation arising from measurement reporting that may affect the limits. On the other hand, the adjusted data has an upward bias in the model fit and may induce records larger than any observed in the raw data.  Here's my current view:  The message in the charts should be an interpolation between the ‘raw’ and the ‘adjusted’ displays.   A display that incorporates adjusted data should allow the user also to see the raw data to make a considered interpretation.  "Presentation of results, to be optimally useful, and to be good science, must conform to Shewhart’s rule: viz., preserve, for the uses intended, all the evidence in the original data.” (W.E. Deming, “On probability as a basis for action”, *American Statistician*, **29**, No. 4., 148)
 
 ## Testing your copy of the code
 
