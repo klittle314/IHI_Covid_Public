@@ -173,7 +173,8 @@ model_phase_change <- function(
 find_phase_dates <- function(
   data,
   adjust,
-  ghost = TRUE)
+  ghost = TRUE,
+  extend_days = 10)
 {
   message(sprintf(' -- %s-level: finding phase dates for %s', data$level[1], data$state[1]))
   
@@ -307,7 +308,7 @@ find_phase_dates <- function(
             }
             
             if (!is.finite(date_phase_end)) {              
-              date_phase_end <- date_max
+              date_phase_end <- date_max + extend_days
             }
             
           } else if (epoch %in% c(2, 3)) {
@@ -397,7 +398,7 @@ find_phase_dates <- function(
             }
             
             if (!is.finite(date_phase_end)) {              
-              date_phase_end <- date_max
+              date_phase_end <- date_max + extend_days
             }
               
             phase_days <- as.numeric(difftime(date_phase_end, date_phase_start, units = 'day')) + 1
@@ -488,6 +489,25 @@ find_phase_dates <- function(
           
           date_phase_start <- date_phase_end + 1
         }
+        
+        # Add blank phase extending out 10 days from date_phase_max
+        if (date_phase_start < date_max) {
+          
+          phase <- phase + 1
+          
+          date_phase_end <- date_max + extend_days
+          
+          phase_parameters[[phase]] <- list(
+            phase = phase,
+            epoch = epoch,
+            midline = NA,
+            lcl = NA,
+            ucl = NA,
+            start = date_phase_start,
+            end   = date_phase_end)
+          
+        }
+        
       } else {
         
         phase_data[[phase]] <- list(
@@ -500,6 +520,20 @@ find_phase_dates <- function(
           end   = max(data_deaths$datex))
         
       }
+    }
+    
+    if (extend_days > 0) {
+      
+      data_extend <- data.frame(
+        level = data$level[1],
+        state = data$state[1],
+        datex = seq(date_max + 1, date_max + extend_days, by = 'day'),
+        New_Deaths = NA,
+        New_Deaths_max = NA,
+        New_Deaths_Dump = NA,
+        stringsAsFactors = FALSE)
+    
+      data <- rbind(data, data_extend)  
     }
     
     for (phase_parameters in phase_data) {
