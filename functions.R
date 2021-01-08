@@ -180,6 +180,11 @@ find_phase_dates <- function(
   
   result <- try({
     
+    if (adjust) {
+      extend_days_unadjusted <- extend_days
+      extend_days <- 0
+    }
+    
     data <- data[order(data$datex), ]
     
     # Remove negative deaths by iteratively reducing the counts (to floor of 0) 
@@ -398,7 +403,23 @@ find_phase_dates <- function(
             }
             
             if (!is.finite(date_phase_end)) {              
+              
               date_phase_end <- date_max + extend_days
+              
+              if (extend_days > 0) {
+                # extend midline and ucl/lcl
+                data_extend <- data.frame(
+                  datex = c(data_deaths$datex, date_max + seq_len(extend_days))) 
+                  
+                data_extend$serial_day <- as.numeric(difftime(data_extend$datex,
+                                                              date_phase_start, 
+                                                              units = 'days')) + 1
+                
+                midline <- predict(phase_change_result$lm, data_extend)
+                
+                # need to extend phase_index too
+                phase_index <- data_extend$datex >= date_phase_start
+              }
             }
               
             phase_days <- as.numeric(difftime(date_phase_end, date_phase_start, units = 'day')) + 1
@@ -577,11 +598,13 @@ find_phase_dates <- function(
     }
     
     if (adjust) {
+      
       data$New_Deaths[!is.finite(data$New_Deaths) & is.na(data$New_Deaths_Dump)] <- 0
       
       data <- find_phase_dates(data = data[c('level', 'state', 'datex', 'New_Deaths', 'New_Deaths_max', 'New_Deaths_Dump')],
                                adjust = FALSE,
-                               ghost = FALSE)
+                               ghost = FALSE,
+                               extend_days = extend_days_unadjusted)
       
     }
     
