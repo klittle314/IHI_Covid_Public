@@ -1,5 +1,5 @@
 # R scripts to generate chart limits used by IHI's PowerBI application
-Notes by [Kevin Little](mailto:klittle@iecodesign.com?subject=[GitHub]IHI_Covid_display_Nov2020), Ph.D., Informing Ecological Design, LLC last updated 3 January 2021
+Notes by [Kevin Little](mailto:klittle@iecodesign.com?subject=[GitHub]IHI_Covid_display_Nov2020), Ph.D., Informing Ecological Design, LLC last updated 19 January 2021
 
 This project implements a method based on Shewhart charts to view phases in daily reported deaths from COVID-19. The method was developed by Lloyd Provost, Shannon Provost, Rocco Perla, Gareth Parry, and Kevin Little, with an initial focus on death series and is described [here](https://academic.oup.com/intqhc/advance-article/doi/10.1093/intqhc/mzaa069/5863166).
 
@@ -102,7 +102,7 @@ The core files are
     - model_phase_change, a function that detects whether the series indicates the start of a new phase in Epochs 2 or 3.
       - Inputs:  a data fame, subsetted to records such that the date > date_phase_end & date <= min(date_phase_end + 21, date_max, na.rm = TRUE); the name of the series to model, in our case the death series.
       - Output: a list that contains the linear model fit to the raw data values; the average log10 deaths; a logical value indicating the sign (plus or minus) of the slope of the log10 linear model; a logical value indicating whether or not the slope of the log10 linear model is statistically significant (p < .05); the median moving range of the residuals from the linear model fit.
-    - find_phase_dates, a function that does the 'heavy lifting'; this function checks for beginning and end of phases and generates the control chart parameters for each phase.  It also adjusts for within-week seasonality in Epochs 2 and 3.
+    - find_phase_dates, a function that does the 'heavy lifting'; this function checks for beginning and end of phases and generates the control chart parameters for each phase.  It also adjusts for within-week seasonality for phases with at least 21 records.
       - Inputs:  a data frame with the death series and indicators of ghosted data, by location; a logical variable to adjust the data for within week seasonality; a logical variable to look for ghosted values.
       - Output:  a data frame that appends new columns to the input data frame:  indicators of epochs and phases within epochs, start dates for phases; Shewhart chart parameters (midline and upper and lower limits) for each phase.
 
@@ -118,6 +118,8 @@ maximum length of series to establish chart limits:  21 records, corresponding t
 starting number of deaths:  at least eight deaths are required in the first phase of Epochs 1 and 4 to estimate chart parameters.  This parameter accounts for the potentially large number of days with zero deaths the first phase of Epochs 1 and 4.
 
 shift length:  eight consecutive values above or below the midline of a phase signal a special cause and the start of a new phase.
+
+Epoch 4 transition limit:  a lower limit value less than 2 is one requirement to transition from Epoch 3 to Epoch 4.  This parameter tunes the sensitivity to transition from Epoch 3.  For events other than deaths, e.g. hospitalizations, the limit might be set higher.
 
 ## Notes on the algorithm
 
