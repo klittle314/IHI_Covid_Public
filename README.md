@@ -173,7 +173,8 @@ Louisiana provides a clear example of the systematic zero, with reported deaths 
 
 In Epochs 1 and 4, a long phase with many zeros can lead to days with one death in the raw series being assigned to zero deaths.  The adjusted value is essentially round(mean of phase).   For mean values less than 0.5, the adjusted value will be zero.   Vermont illustrates this phenomenon.
 
-![Vermont raw data](images/
+![Vermont raw data](images/Vermont%20raw%202021-01-19_22-19-27.jpg)
+![Vermont adjusted data](images/Vermont%20adj%202021-01-19_22-19-27.jpg)
 
 ### Computations related to the c-chart
 The function find_phase_dates calculates the c-chart center line and upper chart limit in Epochs 1 and 4.  As described above, the c-chart calculations are based on several other parameters.  The c-chart calculations require at least 8 non-zero deaths; the maximum number of records used for the c-chart calculations is 21.  As the find_phase_dates function iterates through the records, the calculation stops as soon as a special cause signal is detected.  We designed the c-chart calculations to identify the tentative starting point of exponential growth and recognize this approach might not reproduce the c-chart designed by an analyst to look at a sequence of events.  An analyst might require a minimum number of records (e.g. 15 or 20) and iteratively remove points that generate special cause signal(s).  See the additional discussion below on the difference between the rules used in the first phase of Epoch 1 or 4 and subsequent phases within those epochs.  The detailed table [here](Phase%20and%20Epoch%20logic%20public%20version.pdf) summarizes our rules for transitions from phase to phase within and between epochs.
