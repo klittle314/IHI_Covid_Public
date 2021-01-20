@@ -121,6 +121,8 @@ shift length:  eight consecutive values above or below the midline of a phase si
 
 Epoch 4 transition limit:  a lower limit value less than 2 is one requirement to transition from Epoch 3 to Epoch 4.  This parameter tunes the sensitivity to transition from Epoch 3.  For events other than deaths, e.g. hospitalizations, the limit might be set higher.
 
+Number of days to extend plot beyond most recent record:  10 days.  If the series ends with a phase that has sufficient records to calculate midline and limits, the midline and limits are extended by the number of days.  If the phase does not have enough data to calculate midline and limits, nothing beyond the most recent record. 
+
 ## Notes on the algorithm
 
 ### Flagging and setting aside unusually large values:  ghosting
