@@ -148,30 +148,32 @@ Illinois raw deaths epoch and phase start dates:
  
 The excerpt of the Illinois data records shows that deaths reported on Sunday and Monday are systematically lower than the other days of the week.  This appears to be an administrative source of variation in the death series, a special cause of variation, which will affect the chart limits. Two low values each week will tend to inflate the variation and widen the chart limits.  
 
-Observing this pattern in multiple data series, we sought to eliminate the special cause of variation.  We limited the adjustment to data within Epochs 2 and 3 as the control limits are derived from the range of the day to day differences.  In Epochs 1 and 4, we did not apply the adjustment; the c-charts are defined solely by the average value of the series and may be dominated by many days with zero deaths.
-
+Observing this pattern in multiple data series, we sought to adjust for day-of-week to mitigate the special cause of variation.  
 Here's the logic for adjustment:
 
-1.  Fit the original ("raw") series to obtain phases and epochs.
-2.  Within each fitted phase with at least 21 records for Epochs 2 and 3 and using the linear fit to the log10 deaths:
-(a) compute the residuals as (observed - midline) on the log10 scale.  
+1.  Fit the observed ("raw") series to obtain phases and epochs.
+2.  Within each fitted phase with at least 21 records:
+(a) compute the residuals as (observed - midline).  In Epochs 2 and 3, carry out computations on the log10 scale.  
 (b) by day of week, get the median of the residuals.   This is the adjustment for day of week.
-(c) compute the log10 adjusted death:   adjusted log10 death = log10 observed death - adjustment for day of week.
-(d) compute the adjusted death as 10^adjusted log10 death
-(e) normalize the adjusted deaths so that the total adjusted deaths in the phase matches the total deaths in the phase:
+(c) compute the adjusted death for each day.  
+    In Epochs 1 and 4:  adjusted death = observed death - adjustment for day of week.
+    In Epochs 2 and 3:  adjusted death = 10^(log10 observed death - adjustment for day of week.)
+(d) normalize the adjusted deaths so that the total adjusted deaths in the phase matches the total deaths in the phase:
                norm_adjusted death <- adjusted death * (total raw deaths/total adjusted deaths)
 (e) report the adjusted death as round(norm_adjusted death)
 3. Stitch together the adjusted data, phase by phase.
 
-Once we have the adjusted data series, apply the algorithm to get the epochs and phases.
+Once we have the adjusted data series, we apply the algorithm to get the epochs and phases.
 
-The adjustment logic will fail to adjust some days of the week if the state or country reports zero deaths consistently on those days.  The failure stems from our fitting of log10 deaths:  before fitting, we set the zero deaths to missing.  This means that the day with zero deaths never enters the calculation for adjustment.  See below for discussion of this limitation to our approach. 
+In Epochs 2 and 3, the adjustment logic will fail to adjust some days of the week if the state or country reports zero deaths consistently on those days.  The failure stems from our fitting of log10 deaths:  before fitting, we set the zero deaths to missing.  This means that the day with zero deaths never enters the calculation for adjustment.  See below for additional discussion of this limitation. 
 
-Louisiana provides a clear example of the situation, with reported deaths on Saturdays identically zero for three months starting in July:
+Louisiana provides a clear example of the systematic zero, with reported deaths on Saturdays identically zero for three months starting in July:
 
 ![Saturday pattern](images/Louisiana%20Raw%20Deaths%20Seasonality%202020-11-08_15-25-54.jpg)
 
-In the Louisiana case, our adjustment actually seems to work well: from the data series, it appears that Louisiana is reporting only six days each week for weeks starting in mid-summer and model fits accommodate this structure. 
+In Epochs 1 and 4, a long phase with many zeros can lead to days with one death in the raw series being assigned to zero deaths.  The adjusted value is essentially round(mean of phase).   For mean values less than 0.5, the adjusted value will be zero.   Vermont illustrates this phenomenon.
+
+
 
 ### Computations related to the c-chart
 The function find_phase_dates calculates the c-chart center line and upper chart limit in Epochs 1 and 4.  As described above, the c-chart calculations are based on several other parameters.  The c-chart calculations require at least 8 non-zero deaths; the maximum number of records used for the c-chart calculations is 21.  As the find_phase_dates function iterates through the records, the calculation stops as soon as a special cause signal is detected.  We designed the c-chart calculations to identify the tentative starting point of exponential growth and recognize this approach might not reproduce the c-chart designed by an analyst to look at a sequence of events.  An analyst might require a minimum number of records (e.g. 15 or 20) and iteratively remove points that generate special cause signal(s).  See the additional discussion below on the difference between the rules used in the first phase of Epoch 1 or 4 and subsequent phases within those epochs.  The detailed table [here](Phase%20and%20Epoch%20logic%20public%20version.pdf) summarizes our rules for transitions from phase to phase within and between epochs.
@@ -242,7 +244,11 @@ Also, the adjustment procedure can produce values in the adjusted series that ar
 
 All of the log10 residuals are negative except for the record on 11 October.  Hence the median residual is negative, -0.4215182.  The adjustment rule sets the adjusted deaths as 10^(log10_Deaths - adjustment).   For 11 October, this leads to a raw adjusted value of 469.8272 = 10^(2.2504200 + 0.4215182).  The adjustment algorithm then normalizes the adjusted death series in the phase to have the same total number of deaths as the raw total deaths, which increases the value to 523.   This value is almost twice the value of the maximum observed deaths.
 
-Thus, we have problems with both the raw series and the adjusted series.  The raw data series can show a systematic pattern day-of-week reporting; that is, the series can have a special cause of variation arising from measurement reporting that may affect the limits. On the other hand, the adjusted data has an upward bias in the model fit and may induce records larger than any observed in the raw data.  Here's my current view:  The message in the charts should be an interpolation between the ‘raw’ and the ‘adjusted’ displays.   A display that incorporates adjusted data should allow the user also to see the raw data to make a considered interpretation.  "Presentation of results, to be optimally useful, and to be good science, must conform to Shewhart’s rule: viz., preserve, for the uses intended, all the evidence in the original data.” (W.E. Deming, “On probability as a basis for action”, *American Statistician*, **29**, No. 4., 148)
+Looking at many plots, we see issues with both the raw series and the adjusted series.  The raw data series can show a systematic pattern day-of-week reporting; that is, the series can have a special cause of variation arising from measurement reporting that may affect the limits. In Epochs 2 and 3, as illustrated by Florida, the adjusted data has an upward bias in the model fit and may induce records larger than any observed in the raw data.  
+
+The issues are not limited to Epochs 2 and 3.  In Epochs 1 and 4, adjustment may cause days with an observed death to be adjusted to zero, as illustrated by Vermont.
+
+Here's my current view:  The message in the charts should be an interpolation between the ‘raw’ and the ‘adjusted’ displays.   A display that incorporates adjusted data should allow the user also to see the raw data to make a considered interpretation.  "Presentation of results, to be optimally useful, and to be good science, must conform to Shewhart’s rule: viz., preserve, for the uses intended, all the evidence in the original data.” (W.E. Deming, “On probability as a basis for action”, *American Statistician*, **29**, No. 4., 148)
 
 ## Testing your copy of the code
 
