@@ -210,9 +210,7 @@ Similarly, there are two points below the lower limit in the sixth phase of the 
 
 ![US signal in baseline](images/United%20States%20signal%20in%20baseline%202020-11-08_16-47-50.jpg)
 
-The '21 record' requirement can also lead to a run of values below the midline that is greater than 8 before signal of a new phase.   For example, here is a view of the United Kingdom that shows a run of nine values below baseline before the start of the next phase.   The next phase is in fact triggered by two consecutive points below the lower limit from the previous phase calculations, based on 21 records in the calculations.
 
-![UK signal in baseline](images/UK%20plot%2017%20Nov%202020%20rule%20of%2021.jpeg)
 
 ### Modification of 'Shewhart criterion 1':  points beyond the control limits and overdispersion  
 We modified the Shewhart criterion.  Except for the initial phase of Epoch 1 or Epoch 4, we require two consecutive points beyond the limits in Epochs 2 and 3 to signal the start of a new phase.  We expect to see more than 'usual' variation in the death series.  We dampen the trigger of a new phase by requiring a stronger signal.  For example, a single large value sometimes reflects a 'data dump' by the reporting entity that is not screened by our ghosting function.
@@ -251,13 +249,13 @@ Looking at many plots, we see issues with both the raw series and the adjusted s
 
 The issues are not limited to Epochs 2 and 3.  In Epochs 1 and 4, adjustment may cause days with an observed death to be adjusted to zero, as illustrated by Vermont.
 
-Here's my current view:  The message in the charts should be an interpolation between the ‘raw’ and the ‘adjusted’ displays.   A display that incorporates adjusted data should allow the user also to see the raw data to make a considered interpretation.  "Presentation of results, to be optimally useful, and to be good science, must conform to Shewhart’s rule: viz., preserve, for the uses intended, all the evidence in the original data.” (W.E. Deming, “On probability as a basis for action”, *American Statistician*, **29**, No. 4., 148)
+Here's my current view:  You should interpret the event series after looking at both the ‘raw’ and the ‘adjusted’ displays.   Any display that incorporates adjusted data should allow the user also to see the raw data to make a thoughtful interpretation.  "Presentation of results, to be optimally useful, and to be good science, must conform to Shewhart’s rule: viz., preserve, for the uses intended, all the evidence in the original data.” (W.E. Deming, “On probability as a basis for action”, *American Statistician*, **29**, No. 4., 148)
 
 ## Testing your copy of the code
 
-We include a copy of the input CSV files as of 13 November 2020 for both country and U.S. states and territories. 
+We include a copy of the input CSV files as of 20 January 2021 for both country and U.S. states and territories. 
 
-To avoid overwriting the output files provided for your test, copy the contents of the **samples** folder and **output** folder into renamed folders, e.g. **13Nov_samples** and **13Nov_output**. 
+To avoid overwriting the output files provided for your test, copy the contents of the **samples** folder and **output** folder into renamed folders, e.g. **20Jan_samples** and **20Jan_output**. 
 
 *Reminder:  If you do not copy the contents of these folders, the code will overwrite the existing files.*
 
@@ -286,7 +284,7 @@ And you should see five CSV files in the **output** folder that drive the IHI Po
 - NYT Daily MultiPhase ADJ.csv
 - NYT Daily MultiPhase.csv
 
-Compare the files just generated to the corresponding files 'as of 13 November' that we provided. 
+Compare the files just generated to the corresponding files 'as of 20 January 2021' that we provided. 
 
 ## Contributing
 We have not yet set up a process to incorporate changes into the code.   Check back in the future!
