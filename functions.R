@@ -173,11 +173,17 @@ model_phase_change <- function(
 find_phase_dates <- function(
   data,
   adjust,
-  ghost = TRUE)
+  ghost = TRUE,
+  extend_days = 10)
 {
   message(sprintf(' -- %s-level: finding phase dates for %s', data$level[1], data$state[1]))
   
   result <- try({
+    
+    if (adjust) {
+      extend_days_unadjusted <- extend_days
+      extend_days <- 0
+    }
     
     data <- data[order(data$datex), ]
     
@@ -307,7 +313,7 @@ find_phase_dates <- function(
             }
             
             if (!is.finite(date_phase_end)) {              
-              date_phase_end <- date_max
+              date_phase_end <- date_max + extend_days
             }
             
           } else if (epoch %in% c(2, 3)) {
@@ -397,7 +403,23 @@ find_phase_dates <- function(
             }
             
             if (!is.finite(date_phase_end)) {              
-              date_phase_end <- date_max
+              
+              date_phase_end <- date_max + extend_days
+              
+              if (extend_days > 0) {
+                # extend midline and ucl/lcl
+                data_extend <- data.frame(
+                  datex = c(data_deaths$datex, date_max + seq_len(extend_days))) 
+                  
+                data_extend$serial_day <- as.numeric(difftime(data_extend$datex,
+                                                              date_phase_start, 
+                                                              units = 'days')) + 1
+                
+                midline <- predict(phase_change_result$lm, data_extend)
+                
+                # need to extend phase_index too
+                phase_index <- data_extend$datex >= date_phase_start
+              }
             }
               
             phase_days <- as.numeric(difftime(date_phase_end, date_phase_start, units = 'day')) + 1
@@ -488,6 +510,25 @@ find_phase_dates <- function(
           
           date_phase_start <- date_phase_end + 1
         }
+        
+        # Add blank phase extending out 10 days from date_phase_max
+        if (date_phase_start < date_max) {
+          
+          phase <- phase + 1
+          
+          date_phase_end <- date_max + extend_days
+          
+          phase_parameters[[phase]] <- list(
+            phase = phase,
+            epoch = epoch,
+            midline = NA,
+            lcl = NA,
+            ucl = NA,
+            start = date_phase_start,
+            end   = date_phase_end)
+          
+        }
+        
       } else {
         
         phase_data[[phase]] <- list(
@@ -500,6 +541,20 @@ find_phase_dates <- function(
           end   = max(data_deaths$datex))
         
       }
+    }
+    
+    if (extend_days > 0) {
+      
+      data_extend <- data.frame(
+        level = data$level[1],
+        state = data$state[1],
+        datex = seq(date_max + 1, date_max + extend_days, by = 'day'),
+        New_Deaths = NA,
+        New_Deaths_max = NA,
+        New_Deaths_Dump = NA,
+        stringsAsFactors = FALSE)
+    
+      data <- rbind(data, data_extend)  
     }
     
     for (phase_parameters in phase_data) {
@@ -517,9 +572,14 @@ find_phase_dates <- function(
       # Only adjust series if 1) requested by user,
       # 2) epoch is 2 or 3,
       # 3) at least 21 days of records were observed in this phase.
-      if (adjust && phase_parameters$epoch %in% c(2, 3) && sum(index) >= 21) {
+      # if (adjust && phase_parameters$epoch %in% c(2, 3) && sum(index) >= 21) {
+      if (adjust && sum(index) >= 21) {
         
-        residuals <- log10(data$New_Deaths) - log10(data$midline)
+        if (phase_parameters$epoch %in% c(2, 3)) {
+          residuals <- log10(data$New_Deaths) - log10(data$midline)
+        } else {
+          residuals <- data$New_Deaths - data$midline
+        }
 
         data$weekday <- lubridate::wday(data$datex)
         
@@ -528,8 +588,13 @@ find_phase_dates <- function(
               data$weekday[index],
               FUN = function(x) median(x, na.rm = TRUE))
         
-        adjusted_deaths <- 10 ^ 
-          (log10(data$New_Deaths[index]) - data$residual_by_weekday[index])
+        if (phase_parameters$epoch %in% c(2, 3)) {
+          
+          adjusted_deaths <- 10 ^ 
+            (log10(data$New_Deaths[index]) - data$residual_by_weekday[index])
+        } else {
+          adjusted_deaths <- data$New_Deaths[index] - data$residual_by_weekday[index]
+        }
         
         adjusted_deaths[is.na(data$New_Deaths_Dump[index]) & (!is.finite(adjusted_deaths) | adjusted_deaths < 0)] <- 0
         
@@ -543,11 +608,13 @@ find_phase_dates <- function(
     }
     
     if (adjust) {
+      
       data$New_Deaths[!is.finite(data$New_Deaths) & is.na(data$New_Deaths_Dump)] <- 0
       
       data <- find_phase_dates(data = data[c('level', 'state', 'datex', 'New_Deaths', 'New_Deaths_max', 'New_Deaths_Dump')],
                                adjust = FALSE,
-                               ghost = FALSE)
+                               ghost = FALSE,
+                               extend_days = extend_days_unadjusted)
       
     }
     
