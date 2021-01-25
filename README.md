@@ -1,5 +1,5 @@
 # R scripts to generate chart limits used by IHI's PowerBI application
-Notes by [Kevin Little](mailto:klittle@iecodesign.com?subject=[GitHub]IHI_Covid_display_Nov2020), Ph.D., Informing Ecological Design, LLC last updated 3 January 2021
+Notes by [Kevin Little](mailto:klittle@iecodesign.com?subject=[GitHub]IHI_Covid_display_Nov2020), Ph.D., Informing Ecological Design, LLC last updated 19 January 2021
 
 This project implements a method based on Shewhart charts to view phases in daily reported deaths from COVID-19. The method was developed by Lloyd Provost, Shannon Provost, Rocco Perla, Gareth Parry, and Kevin Little, with an initial focus on death series and is described [here](https://academic.oup.com/intqhc/advance-article/doi/10.1093/intqhc/mzaa069/5863166).
 
@@ -102,7 +102,7 @@ The core files are
     - model_phase_change, a function that detects whether the series indicates the start of a new phase in Epochs 2 or 3.
       - Inputs:  a data fame, subsetted to records such that the date > date_phase_end & date <= min(date_phase_end + 21, date_max, na.rm = TRUE); the name of the series to model, in our case the death series.
       - Output: a list that contains the linear model fit to the raw data values; the average log10 deaths; a logical value indicating the sign (plus or minus) of the slope of the log10 linear model; a logical value indicating whether or not the slope of the log10 linear model is statistically significant (p < .05); the median moving range of the residuals from the linear model fit.
-    - find_phase_dates, a function that does the 'heavy lifting'; this function checks for beginning and end of phases and generates the control chart parameters for each phase.  It also adjusts for within-week seasonality in Epochs 2 and 3.
+    - find_phase_dates, a function that does the 'heavy lifting'; this function checks for beginning and end of phases and generates the control chart parameters for each phase.  It also adjusts for within-week seasonality for phases with at least 21 records.
       - Inputs:  a data frame with the death series and indicators of ghosted data, by location; a logical variable to adjust the data for within week seasonality; a logical variable to look for ghosted values.
       - Output:  a data frame that appends new columns to the input data frame:  indicators of epochs and phases within epochs, start dates for phases; Shewhart chart parameters (midline and upper and lower limits) for each phase.
 
@@ -118,6 +118,10 @@ maximum length of series to establish chart limits:  21 records, corresponding t
 starting number of deaths:  at least eight deaths are required in the first phase of Epochs 1 and 4 to estimate chart parameters.  This parameter accounts for the potentially large number of days with zero deaths the first phase of Epochs 1 and 4.
 
 shift length:  eight consecutive values above or below the midline of a phase signal a special cause and the start of a new phase.
+
+Epoch 4 transition limit:  a lower limit value less than 2 is one requirement to transition from Epoch 3 to Epoch 4.  This parameter tunes the sensitivity to transition from Epoch 3.  For events other than deaths, e.g. hospitalizations, the limit might be set higher.
+
+Number of days to extend plot beyond most recent record:  10 days.  If the series ends with a phase that has sufficient records to calculate midline and limits, the midline and limits are extended by the number of days.  If the phase does not have enough data to calculate midline and limits, nothing beyond the most recent record. 
 
 ## Notes on the algorithm
 
@@ -146,30 +150,33 @@ Illinois raw deaths epoch and phase start dates:
  
 The excerpt of the Illinois data records shows that deaths reported on Sunday and Monday are systematically lower than the other days of the week.  This appears to be an administrative source of variation in the death series, a special cause of variation, which will affect the chart limits. Two low values each week will tend to inflate the variation and widen the chart limits.  
 
-Observing this pattern in multiple data series, we sought to eliminate the special cause of variation.  We limited the adjustment to data within Epochs 2 and 3 as the control limits are derived from the range of the day to day differences.  In Epochs 1 and 4, we did not apply the adjustment; the c-charts are defined solely by the average value of the series and may be dominated by many days with zero deaths.
-
+Observing this pattern in multiple data series, we sought to adjust for day-of-week to mitigate the special cause of variation.  
 Here's the logic for adjustment:
 
-1.  Fit the original ("raw") series to obtain phases and epochs.
-2.  Within each fitted phase with at least 21 records for Epochs 2 and 3 and using the linear fit to the log10 deaths:
-(a) compute the residuals as (observed - midline) on the log10 scale.  
+1.  Fit the observed ("raw") series to obtain phases and epochs.
+2.  Within each fitted phase with at least 21 records:
+(a) compute the residuals as (observed - midline).  In Epochs 2 and 3, carry out computations on the log10 scale.  
 (b) by day of week, get the median of the residuals.   This is the adjustment for day of week.
-(c) compute the log10 adjusted death:   adjusted log10 death = log10 observed death - adjustment for day of week.
-(d) compute the adjusted death as 10^adjusted log10 death
-(e) normalize the adjusted deaths so that the total adjusted deaths in the phase matches the total deaths in the phase:
+(c) compute the adjusted death for each day.  
+    In Epochs 1 and 4:  adjusted death = observed death - adjustment for day of week.
+    In Epochs 2 and 3:  adjusted death = 10^(log10 observed death - adjustment for day of week.)
+(d) normalize the adjusted deaths so that the total adjusted deaths in the phase matches the total deaths in the phase:
                norm_adjusted death <- adjusted death * (total raw deaths/total adjusted deaths)
 (e) report the adjusted death as round(norm_adjusted death)
 3. Stitch together the adjusted data, phase by phase.
 
-Once we have the adjusted data series, apply the algorithm to get the epochs and phases.
+Once we have the adjusted data series, we apply the algorithm to get the epochs and phases.
 
-The adjustment logic will fail to adjust some days of the week if the state or country reports zero deaths consistently on those days.  The failure stems from our fitting of log10 deaths:  before fitting, we set the zero deaths to missing.  This means that the day with zero deaths never enters the calculation for adjustment.  See below for discussion of this limitation to our approach. 
+In Epochs 2 and 3, the adjustment logic will fail to adjust some days of the week if the state or country reports zero deaths consistently on those days.  The failure stems from our fitting of log10 deaths:  before fitting, we set the zero deaths to missing.  This means that the day with zero deaths never enters the calculation for adjustment.  See below for additional discussion of this limitation. 
 
-Louisiana provides a clear example of the situation, with reported deaths on Saturdays identically zero for three months starting in July:
+Louisiana provides a clear example of the systematic zero, with reported deaths on Saturdays identically zero for three months starting in July:
 
 ![Saturday pattern](images/Louisiana%20Raw%20Deaths%20Seasonality%202020-11-08_15-25-54.jpg)
 
-In the Louisiana case, our adjustment actually seems to work well: from the data series, it appears that Louisiana is reporting only six days each week for weeks starting in mid-summer and model fits accommodate this structure. 
+In Epochs 1 and 4, a long phase with many zeros can lead to days with one death in the raw series being assigned to zero deaths.  The adjusted value is essentially round(mean of phase).   For mean values less than 0.5, the adjusted value will be zero.   Vermont illustrates this phenomenon.
+
+![Vermont raw data](images/Vermont%20raw%202021-01-19_22-19-27.jpg)
+![Vermont adjusted data](images/Vermont%20adj%202021-01-19_22-19-27.jpg)
 
 ### Computations related to the c-chart
 The function find_phase_dates calculates the c-chart center line and upper chart limit in Epochs 1 and 4.  As described above, the c-chart calculations are based on several other parameters.  The c-chart calculations require at least 8 non-zero deaths; the maximum number of records used for the c-chart calculations is 21.  As the find_phase_dates function iterates through the records, the calculation stops as soon as a special cause signal is detected.  We designed the c-chart calculations to identify the tentative starting point of exponential growth and recognize this approach might not reproduce the c-chart designed by an analyst to look at a sequence of events.  An analyst might require a minimum number of records (e.g. 15 or 20) and iteratively remove points that generate special cause signal(s).  See the additional discussion below on the difference between the rules used in the first phase of Epoch 1 or 4 and subsequent phases within those epochs.  The detailed table [here](Phase%20and%20Epoch%20logic%20public%20version.pdf) summarizes our rules for transitions from phase to phase within and between epochs.
@@ -203,9 +210,7 @@ Similarly, there are two points below the lower limit in the sixth phase of the 
 
 ![US signal in baseline](images/United%20States%20signal%20in%20baseline%202020-11-08_16-47-50.jpg)
 
-The '21 record' requirement can also lead to a run of values below the midline that is greater than 8 before signal of a new phase.   For example, here is a view of the United Kingdom that shows a run of nine values below baseline before the start of the next phase.   The next phase is in fact triggered by two consecutive points below the lower limit from the previous phase calculations, based on 21 records in the calculations.
 
-![UK signal in baseline](images/UK%20plot%2017%20Nov%202020%20rule%20of%2021.jpeg)
 
 ### Modification of 'Shewhart criterion 1':  points beyond the control limits and overdispersion  
 We modified the Shewhart criterion.  Except for the initial phase of Epoch 1 or Epoch 4, we require two consecutive points beyond the limits in Epochs 2 and 3 to signal the start of a new phase.  We expect to see more than 'usual' variation in the death series.  We dampen the trigger of a new phase by requiring a stronger signal.  For example, a single large value sometimes reflects a 'data dump' by the reporting entity that is not screened by our ghosting function.
@@ -240,13 +245,17 @@ Also, the adjustment procedure can produce values in the adjusted series that ar
 
 All of the log10 residuals are negative except for the record on 11 October.  Hence the median residual is negative, -0.4215182.  The adjustment rule sets the adjusted deaths as 10^(log10_Deaths - adjustment).   For 11 October, this leads to a raw adjusted value of 469.8272 = 10^(2.2504200 + 0.4215182).  The adjustment algorithm then normalizes the adjusted death series in the phase to have the same total number of deaths as the raw total deaths, which increases the value to 523.   This value is almost twice the value of the maximum observed deaths.
 
-Thus, we have problems with both the raw series and the adjusted series.  The raw data series can show a systematic pattern day-of-week reporting; that is, the series can have a special cause of variation arising from measurement reporting that may affect the limits. On the other hand, the adjusted data has an upward bias in the model fit and may induce records larger than any observed in the raw data.  Here's my current view:  The message in the charts should be an interpolation between the ‘raw’ and the ‘adjusted’ displays.   A display that incorporates adjusted data should allow the user also to see the raw data to make a considered interpretation.  "Presentation of results, to be optimally useful, and to be good science, must conform to Shewhart’s rule: viz., preserve, for the uses intended, all the evidence in the original data.” (W.E. Deming, “On probability as a basis for action”, *American Statistician*, **29**, No. 4., 148)
+Looking at many plots, we see issues with both the raw series and the adjusted series.  The raw data series can show a systematic pattern day-of-week reporting; that is, the series can have a special cause of variation arising from measurement reporting that may affect the limits. In Epochs 2 and 3, as illustrated by Florida, the adjusted data has an upward bias in the model fit and may induce records larger than any observed in the raw data.  
+
+The issues are not limited to Epochs 2 and 3.  In Epochs 1 and 4, adjustment may cause days with an observed death to be adjusted to zero, as illustrated by Vermont.
+
+Here's my current view:  You should interpret the event series after looking at both the ‘raw’ and the ‘adjusted’ displays.   Any display that incorporates adjusted data should allow the user also to see the raw data to make a thoughtful interpretation.  "Presentation of results, to be optimally useful, and to be good science, must conform to Shewhart’s rule: viz., preserve, for the uses intended, all the evidence in the original data.” (W.E. Deming, “On probability as a basis for action”, *American Statistician*, **29**, No. 4., 148)
 
 ## Testing your copy of the code
 
-We include a copy of the input CSV files as of 13 November 2020 for both country and U.S. states and territories. 
+We include a copy of the input CSV files as of 20 January 2021 for both country and U.S. states and territories. 
 
-To avoid overwriting the output files provided for your test, copy the contents of the **samples** folder and **output** folder into renamed folders, e.g. **13Nov_samples** and **13Nov_output**. 
+To avoid overwriting the output files provided for your test, copy the contents of the **samples** folder and **output** folder into renamed folders, e.g. **20Jan_samples** and **20Jan_output**. 
 
 *Reminder:  If you do not copy the contents of these folders, the code will overwrite the existing files.*
 
@@ -275,7 +284,7 @@ And you should see five CSV files in the **output** folder that drive the IHI Po
 - NYT Daily MultiPhase ADJ.csv
 - NYT Daily MultiPhase.csv
 
-Compare the files just generated to the corresponding files 'as of 13 November' that we provided. 
+Compare the files just generated to the corresponding files 'as of 20 January 2021' that we provided. 
 
 ## Contributing
 We have not yet set up a process to incorporate changes into the code.   Check back in the future!

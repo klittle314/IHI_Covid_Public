@@ -415,7 +415,14 @@ find_phase_dates <- function(
                                                               date_phase_start, 
                                                               units = 'days')) + 1
                 
-                midline <- predict(phase_change_result$lm, data_extend)
+                # if exponential growth is detected (up or down),
+                # extend the model prediction, otherwise just
+                # extend the constant value to the extended date interval
+                if (phase_change_result$exp_growth) {
+                  midline <- predict(phase_change_result$lm, data_extend)
+                } else if (epoch == 3) {
+                  midline <- rep(midline[1], nrow(data_extend))
+                }
                 
                 # need to extend phase_index too
                 phase_index <- data_extend$datex >= date_phase_start
@@ -572,9 +579,14 @@ find_phase_dates <- function(
       # Only adjust series if 1) requested by user,
       # 2) epoch is 2 or 3,
       # 3) at least 21 days of records were observed in this phase.
-      if (adjust && phase_parameters$epoch %in% c(2, 3) && sum(index) >= 21) {
+      # if (adjust && phase_parameters$epoch %in% c(2, 3) && sum(index) >= 21) {
+      if (adjust && sum(index) >= 21) {
         
-        residuals <- log10(data$New_Deaths) - log10(data$midline)
+        if (phase_parameters$epoch %in% c(2, 3)) {
+          residuals <- log10(data$New_Deaths) - log10(data$midline)
+        } else {
+          residuals <- data$New_Deaths - data$midline
+        }
 
         data$weekday <- lubridate::wday(data$datex)
         
@@ -583,8 +595,13 @@ find_phase_dates <- function(
               data$weekday[index],
               FUN = function(x) median(x, na.rm = TRUE))
         
-        adjusted_deaths <- 10 ^ 
-          (log10(data$New_Deaths[index]) - data$residual_by_weekday[index])
+        if (phase_parameters$epoch %in% c(2, 3)) {
+          
+          adjusted_deaths <- 10 ^ 
+            (log10(data$New_Deaths[index]) - data$residual_by_weekday[index])
+        } else {
+          adjusted_deaths <- data$New_Deaths[index] - data$residual_by_weekday[index]
+        }
         
         adjusted_deaths[is.na(data$New_Deaths_Dump[index]) & (!is.finite(adjusted_deaths) | adjusted_deaths < 0)] <- 0
         
