@@ -415,7 +415,14 @@ find_phase_dates <- function(
                                                               date_phase_start, 
                                                               units = 'days')) + 1
                 
-                midline <- predict(phase_change_result$lm, data_extend)
+                # if exponential growth is detected (up or down),
+                # extend the model prediction, otherwise just
+                # extend the constant value to the extended date interval
+                if (phase_change_result$exp_growth) {
+                  midline <- predict(phase_change_result$lm, data_extend)
+                } else if (epoch == 3) {
+                  midline <- rep(midline[1], nrow(data_extend))
+                }
                 
                 # need to extend phase_index too
                 phase_index <- data_extend$datex >= date_phase_start
