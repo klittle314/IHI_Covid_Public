@@ -1,5 +1,5 @@
 # R scripts to generate chart limits used by IHI's PowerBI application
-Notes by [Kevin Little](mailto:klittle@iecodesign.com?subject=[GitHub]IHI_Covid_display_Nov2020), Ph.D., Informing Ecological Design, LLC last updated 19 January 2021
+Notes by [Kevin Little](mailto:klittle@iecodesign.com?subject=[GitHub]IHI_Covid_display_Nov2020), Ph.D., Informing Ecological Design, LLC last updated 17 February 2021
 
 This project implements a method based on Shewhart charts to view phases in daily reported deaths from COVID-19. The method was developed by Lloyd Provost, Shannon Provost, Rocco Perla, Gareth Parry, and Kevin Little, with an initial focus on death series and is described [here](https://academic.oup.com/intqhc/advance-article/doi/10.1093/intqhc/mzaa069/5863166).
 
@@ -253,9 +253,9 @@ Here's my current view:  You should interpret the event series after looking at 
 
 ## Testing your copy of the code
 
-We include a copy of the input CSV files as of 20 January 2021 for both country and U.S. states and territories. 
+We include a copy of the input CSV files as of 5 February 2021 for both country and U.S. states and territories in the folder **data**.
 
-To avoid overwriting the output files provided for your test, copy the contents of the **samples** folder and **output** folder into renamed folders, e.g. **20Jan_samples** and **20Jan_output**. 
+To avoid overwriting the output files provided for your test, copy the contents of the **samples** folder and **output** folder into renamed folders, e.g. **05Feb_samples** and **05Feb_output**. 
 
 *Reminder:  If you do not copy the contents of these folders, the code will overwrite the existing files.*
 
@@ -266,8 +266,8 @@ data_file_state   <- paste0('data/us_state_data_', as.character(Sys.Date()), '.c
 ```
 with path to your renamed folder
 ```
-data_file_country <- paste0('data/country_data_2020-11-13.csv')
-data_file_state   <- paste0('data/us_state_data_2020-11-13.csv)
+data_file_country <- paste0('data/country_data_2021-02-05.csv')
+data_file_state   <- paste0('data/us_state_data_2021-02-05.csv)
 ```
 If the code runs correctly, you should see four pdf files of plots in the **samples** folder:
 
@@ -284,7 +284,7 @@ And you should see five CSV files in the **output** folder that drive the IHI Po
 - NYT Daily MultiPhase ADJ.csv
 - NYT Daily MultiPhase.csv
 
-Compare the files just generated to the corresponding files 'as of 20 January 2021' that we provided. 
+Compare the files just generated to the corresponding files 'as of 5 February 2021' that we provided. 
 
 ## Contributing
 We have not yet set up a process to incorporate changes into the code.   Check back in the future!
