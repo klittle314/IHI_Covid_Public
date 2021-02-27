@@ -60,6 +60,8 @@ df_state$level          <- 'state'
 
 df_state <- df_state[c('level', 'state', 'datex', 'New_Deaths', 'New_Deaths_max')]
 
+date_max_state <- max(df_state$datex, na.rm = TRUE)
+
 df_all <- rbind(df_country, df_state)
 
 # plot(df_all$datex, df_all$New_Deaths, type='l')
@@ -194,9 +196,10 @@ df_split <- lapply(
     df
   })
 
-epoch_counts_by_date <- lapply(df_split,
-  FUN = function(data) {
+epoch_counts_by_date <- lapply(df_split['adjusted.state'],
+  FUN = function(data, date_max_state) {
     
+    data <- data[data$datex <= date_max_state, ]
     n_states <- length(unique(data$state))
     
     # When phases end with less than 5 days remaining in the overall series,
@@ -242,7 +245,8 @@ epoch_counts_by_date <- lapply(df_split,
       n_states = n_states)
     
     do.call(rbind, results)
-  })
+  },
+  date_max_state = date_max_state)
 
 df_split <- lapply(df_split,
                    FUN = function(data) {
